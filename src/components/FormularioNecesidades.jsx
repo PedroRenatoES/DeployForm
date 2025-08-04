@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Minus, Eye, Edit, Save, X, Check } from 'lucide-react';
+import './FormularioNecesidades.css';
 
 const FormularioNecesidades = () => {
   const [formData, setFormData] = useState({
@@ -11,99 +11,95 @@ const FormularioNecesidades = () => {
     contactoCelularLogistica: '',
     numeroEmergenciaPublico: '',
     
-    // EPP - Ropa (convertido a arrays)
-    camisasForestales: [{ id: 1, xs: '', s: '', m: '', l: '', xl: '', observaciones: '' }],
-    pantalonesForestales: [{ id: 1, xs: '', s: '', m: '', l: '', xl: '', observaciones: '' }],
-    overolesFr: [{ id: 1, xs: '', s: '', m: '', l: '', xl: '', observaciones: '' }],
+    // EPP - Ropa
+    camisaForestal: { xs: '', s: '', m: '', l: '', xl: '', observaciones: '' },
+    pantalonForestal: { xs: '', s: '', m: '', l: '', xl: '', observaciones: '' },
+    overolFr: { xs: '', s: '', m: '', l: '', xl: '', observaciones: '' },
     
-    // Calzado y guantes (convertido a arrays)
-    botasBomberos: [{ id: 1, t37: '', t38: '', t39: '', t40: '', t41: '', t42: '', t43: '', otraTalla: '', observaciones: '' }],
-    guantesCuero: [{ id: 1, xs: '', s: '', m: '', l: '', xl: '', xxl: '', otraTalla: '', observaciones: '' }],
+    // Calzado y guantes
+    botasBomberos: { t37: '', t38: '', t39: '', t40: '', t41: '', t42: '', t43: '', otraTalla: '', observaciones: '' },
+    guantesCuero: { xs: '', s: '', m: '', l: '', xl: '', xxl: '', otraTalla: '', observaciones: '' },
     
-    // Equipamiento EPP (convertido a arrays)
-    esclavinas: [{ id: 1, cantidad: '', observaciones: '' }],
-    linternas: [{ id: 1, cantidad: '', observaciones: '' }],
-    antiparras: [{ id: 1, cantidad: '', observaciones: '' }],
-    cascosForestales: [{ id: 1, cantidad: '', observaciones: '' }],
-    mascarasPolvo: [{ id: 1, cantidad: '', observaciones: '' }],
-    mascarasMediaCara: [{ id: 1, cantidad: '', observaciones: '' }],
+    // Equipamiento EPP
+    esclavina: { cantidad: '', observaciones: '' },
+    linterna: { cantidad: '', observaciones: '' },
+    antiparra: { cantidad: '', observaciones: '' },
+    cascoForestal: { cantidad: '', observaciones: '' },
+    mascaraPolvo: { cantidad: '', observaciones: '' },
+    mascaraMediaCara: { cantidad: '', observaciones: '' },
     
-    // Herramientas dinámicas (sin cambios)
-    herramientas: [
-      { id: 1, nombre: 'Linternas de Cabeza', cantidad: '', observaciones: '' },
-      { id: 2, nombre: 'Pilas AA', cantidad: '', observaciones: '' },
-      { id: 3, nombre: 'Pilas AAA', cantidad: '', observaciones: '' },
-      { id: 4, nombre: 'Azadón', cantidad: '', observaciones: '' },
-      { id: 5, nombre: 'Pala con Mango de Fibra', cantidad: '', observaciones: '' }
-    ],
+    // Herramientas
+    linternasCabeza: { cantidad: '', observaciones: '' },
+    pilasAA: { cantidad: '', observaciones: '' },
+    pilasAAA: { cantidad: '', observaciones: '' },
+    azadon: { cantidad: '', observaciones: '' },
+    palaMangoFibra: { cantidad: '', observaciones: '' },
+    rastrilloMangoFibra: { cantidad: '', observaciones: '' },
+    mcleodMangoFibra: { cantidad: '', observaciones: '' },
+    batefuego: { cantidad: '', observaciones: '' },
+    gorgui: { cantidad: '', observaciones: '' },
+    pulaskyMangoFibra: { cantidad: '', observaciones: '' },
+    quemadorGoteo: { cantidad: '', observaciones: '' },
+    mochilaForestal: { cantidad: '', observaciones: '' },
+    escobetaAlambre: { cantidad: '', observaciones: '' },
     
-    // Logística dinámica (sin cambios)
-    logistica: [
-      { id: 1, nombre: 'Gasolina', cantidad: '', observaciones: '' },
-      { id: 2, nombre: 'Diésel', cantidad: '', observaciones: '' },
-      { id: 3, nombre: 'Amortiguadores', cantidad: '', observaciones: '' }
-    ],
+    // Logística - Repuestos vehículos
+    gasolina: { cantidad: '', observaciones: '' },
+    diesel: { cantidad: '', observaciones: '' },
+    amortiguadores: { cantidad: '', observaciones: '' },
+    prensaDisco: { cantidad: '', observaciones: '' },
+    rectificacionFreno: { cantidad: '', observaciones: '' },
+    llantas: { cantidad: '', observaciones: '' },
+    aceiteMotor: { cantidad: '', observaciones: '' },
+    grasa: { cantidad: '', observaciones: '' },
+    cambioAceite: { cantidad: '', observaciones: '' },
+    otroArreglo: { cantidad: '', observaciones: '' },
     
-    // Alimentación dinámica (sin cambios)
-    alimentacion: [
-      { id: 1, nombre: 'Agua', cantidad: '', observaciones: '' },
-      { id: 2, nombre: 'Rehidratantes', cantidad: '', observaciones: '' },
-      { id: 3, nombre: 'Barras Energizantes', cantidad: '', observaciones: '' }
-    ],
+    // Alimentación y bebidas
+    alimentosBebidas: { cantidad: '', observaciones: '' },
+    agua: { cantidad: '', observaciones: '' },
+    rehidratantes: { cantidad: '', observaciones: '' },
+    barrasEnergizantes: { cantidad: '', observaciones: '' },
+    lataAtun: { cantidad: '', observaciones: '' },
+    lataFrejol: { cantidad: '', observaciones: '' },
+    lataViandada: { cantidad: '', observaciones: '' },
+    lataChorizo: { cantidad: '', observaciones: '' },
+    refrescoSobres: { cantidad: '', observaciones: '' },
+    lechePolvo: { cantidad: '', observaciones: '' },
+    frutosSecos: { cantidad: '', observaciones: '' },
+    pastillasMenta: { cantidad: '', observaciones: '' },
+    alimentosNoPerecibles: { cantidad: '', observaciones: '' },
     
-    // Limpieza dinámica (sin cambios)
-    limpieza: [
-      { id: 1, nombre: 'Shampoo', cantidad: '', observaciones: '' },
-      { id: 2, nombre: 'Jaboncillos', cantidad: '', observaciones: '' }
-    ],
+    // Logística y equipo de campo
+    colchoneta: { cantidad: '', observaciones: '' },
+    sleeping: { cantidad: '', observaciones: '' },
+    camping: { cantidad: '', observaciones: '' },
     
-    // Medicamentos dinámicos (sin cambios)
-    medicamentos: [
-      { id: 1, nombre: 'Agua Destilada 5 ML', cantidad: '', observaciones: '' },
-      { id: 2, nombre: 'Alcohol', cantidad: '', observaciones: '' }
-    ]
+    // Limpieza personal
+    shampoo: { cantidad: '', observaciones: '' },
+    jaboncillos: { cantidad: '', observaciones: '' },
+    pastaDental: { cantidad: '', observaciones: '' },
+    cepilloDientes: { cantidad: '', observaciones: '' },
+    toallasHumedas: { cantidad: '', observaciones: '' },
+    toallasHigienicas: { cantidad: '', observaciones: '' },
+    papelHigienico: { cantidad: '', observaciones: '' },
+    
+    // Limpieza general
+    ace: { cantidad: '', observaciones: '' },
+    lavandina: { cantidad: '', observaciones: '' },
+    
+    // Medicamentos
+    aguaDestilada: { cantidad: '', observaciones: '' },
+    aguaOxigenada: { cantidad: '', observaciones: '' },
+    alcohol: { cantidad: '', observaciones: '' },
+    algodon: { cantidad: '', observaciones: '' },
+    amoxicilina: { cantidad: '', observaciones: '' },
+    bacitracina: { cantidad: '', observaciones: '' },
+    branula18: { cantidad: '', observaciones: '' },
+    
+    // Rescate animal
+    alimentosAnimales: { cantidad: '', observaciones: '' }
   });
-
-  const [showPreview, setShowPreview] = useState(false);
-  const [editingField, setEditingField] = useState(null);
-  const [errors, setErrors] = useState({});
-  const [isSubmitting, setIsSubmitting] = useState(false); // Nuevo estado para la carga de envío
-
-  // Funciones CRUD para listas dinámicas
-  const addItem = (listName, initialData) => {
-    const newId = formData[listName].length > 0 
-      ? Math.max(...formData[listName].map(item => item.id)) + 1 
-      : 1;
-    
-    setFormData(prev => ({
-      ...prev,
-      [listName]: [...prev[listName], { 
-        id: newId, 
-        ...initialData 
-      }]
-    }));
-  };
-
-  const removeItem = (listName, id) => {
-    if (formData[listName].length <= 1) {
-      alert(`Debe mantener al menos un elemento en ${listName}`);
-      return;
-    }
-    
-    setFormData(prev => ({
-      ...prev,
-      [listName]: prev[listName].filter(item => item.id !== id)
-    }));
-  };
-
-  const updateItem = (listName, id, field, value) => {
-    setFormData(prev => ({
-      ...prev,
-      [listName]: prev[listName].map(item => 
-        item.id === id ? { ...item, [field]: value } : item
-      )
-    }));
-  };
 
   const handleInputChange = (section, field, value) => {
     setFormData(prev => ({
@@ -114,273 +110,79 @@ const FormularioNecesidades = () => {
     }));
   };
 
-  const validateForm = () => {
-    const newErrors = {};
-    
-    if (!formData.nombreBrigada) newErrors.nombreBrigada = 'Nombre de brigada es requerido';
-    if (!formData.cantidadBomberosActivos) newErrors.cantidadBomberosActivos = 'Cantidad de bomberos es requerida';
-    if (!formData.contactoCelularComandante) newErrors.contactoCelularComandante = 'Contacto del comandante es requerido';
-    
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    console.log('Datos del formulario:', formData);
+    // Aquí puedes agregar la lógica para enviar los datos
+    alert('Formulario enviado correctamente');
   };
 
-  const handleSubmit = () => {
-    if (validateForm()) {
-      setIsSubmitting(true); // Activar el estado de carga
-      
-      // Simulamos el envío a la API con un setTimeout
-      setTimeout(() => {
-        console.log('Datos del formulario:', formData);
-        setIsSubmitting(false);
-        alert('Formulario enviado correctamente');
-        setShowPreview(false);
-      }, 2000);
-    }
-  };
-
-  const renderBasicInput = (label, key, placeholder = '', required = false) => (
+  const renderBasicInput = (label, key, placeholder = '') => (
     <div className="form-group">
-      <label>{label} {required && <span className="required">*</span>}</label>
+      <label>{label}</label>
       <input
         type="text"
         value={formData[key] || ''}
         onChange={(e) => setFormData(prev => ({ ...prev, [key]: e.target.value }))}
         placeholder={placeholder}
-        className={errors[key] ? 'error' : ''}
       />
-      {errors[key] && <span className="error-message">{errors[key]}</span>}
     </div>
   );
 
-  // Renderiza una sección de tallas con CRUD
-  const renderSizeInputsWithCRUD = (listName, title, sizes) => (
-    <div className="epp-item">
-      <div className="section-header">
-        <h3>{title}</h3>
-        <button 
-          type="button" 
-          className="add-button"
-          onClick={() => addItem(listName, Object.fromEntries(
-  sizes.map(size => [size, '']).concat([['observaciones', '']])
-))}
->
-          <Plus size={16} /> Agregar
-        </button>
-      </div>
-      
-      {formData[listName].map((item, index) => (
-        <div key={item.id} className="size-item-with-crud">
-          <div className="item-number">{index + 1}</div>
-          <div className="size-inputs">
-            {sizes.map(size => (
-              <div key={size} className="size-input">
-                <label>{size.toUpperCase()}</label>
-                <input
-                  type="number"
-                  value={item[size]}
-                  onChange={(e) => updateItem(listName, item.id, size, e.target.value)}
-                />
-              </div>
-            ))}
-            <div className="observations-input">
-              <label>Observaciones</label>
-              <input
-                type="text"
-                value={item.observaciones}
-                onChange={(e) => updateItem(listName, item.id, 'observaciones', e.target.value)}
-              />
-            </div>
-          </div>
-          <button 
-            type="button" 
-            className="remove-button"
-            onClick={() => removeItem(listName, item.id)}
-          >
-            <Minus size={16} />
-          </button>
-        </div>
-      ))}
-    </div>
-  );
-
-  // Renderiza una sección de cantidad con CRUD
-  const renderQuantityInputWithCRUD = (listName, title) => (
-    <div className="epp-item">
-      <div className="section-header">
-        <h3>{title}</h3>
-        <button 
-          type="button" 
-          className="add-button"
-          onClick={() => addItem(listName, { cantidad: '', observaciones: '' })}
-        >
-          <Plus size={16} /> Agregar
-        </button>
-      </div>
-      
-      {formData[listName].map((item, index) => (
-        <div key={item.id} className="quantity-item-with-crud">
-          <div className="item-number">{index + 1}</div>
-          <div className="quantity-obs-group">
-            <input
-              type="number"
-              value={item.cantidad}
-              onChange={(e) => updateItem(listName, item.id, 'cantidad', e.target.value)}
-              placeholder="Cantidad"
-            />
-            <input
-              type="text"
-              value={item.observaciones}
-              onChange={(e) => updateItem(listName, item.id, 'observaciones', e.target.value)}
-              placeholder="Observaciones"
-            />
-          </div>
-          <button 
-            type="button" 
-            className="remove-button"
-            onClick={() => removeItem(listName, item.id)}
-          >
-            <Minus size={16} />
-          </button>
-        </div>
-      ))}
-    </div>
-  );
-
-  const renderDynamicList = (listName, title) => (
-    <div className="dynamic-section">
-      <div className="section-header">
-        <h3>{title}</h3>
-        <button 
-          type="button" 
-          className="add-button"
-          onClick={() => addItem(listName, { nombre: '', cantidad: '', observaciones: '' })}
-        >
-          <Plus size={16} /> Agregar {title.slice(0, -1)}
-        </button>
-      </div>
-      
-      {formData[listName].map((item, index) => (
-        <div key={item.id} className="dynamic-item">
-          <div className="item-number">{index + 1}</div>
-          <input
-            type="text"
-            value={item.nombre}
-            onChange={(e) => updateItem(listName, item.id, 'nombre', e.target.value)}
-            placeholder="Nombre del item"
-            className="item-name"
-          />
+  const renderSizeInputs = (itemKey, sizes = ['xs', 's', 'm', 'l', 'xl']) => (
+    <div className="size-inputs">
+      {sizes.map(size => (
+        <div key={size} className="size-input">
+          <label>{size.toUpperCase()}</label>
           <input
             type="number"
-            value={item.cantidad}
-            onChange={(e) => updateItem(listName, item.id, 'cantidad', e.target.value)}
-            placeholder="Cantidad"
-            className="item-quantity"
+            value={formData[itemKey]?.[size] || ''}
+            onChange={(e) => handleInputChange(itemKey, size, e.target.value)}
           />
-          <input
-            type="text"
-            value={item.observaciones}
-            onChange={(e) => updateItem(listName, item.id, 'observaciones', e.target.value)}
-            placeholder="Observaciones"
-            className="item-observations"
-          />
-          <button 
-            type="button" 
-            className="remove-button"
-            onClick={() => removeItem(listName, item.id)}
-          >
-            <Minus size={16} />
-          </button>
         </div>
       ))}
-    </div>
-  );
-
-  const renderPreview = () => (
-    <div className="preview-container">
-      <div className="preview-header">
-        <h2>Vista Previa del Formulario</h2>
-        <div className="preview-actions">
-          <button 
-            className="edit-button"
-            onClick={() => setShowPreview(false)}
-          >
-            <Edit size={16} /> Editar
-          </button>
-          <button 
-            className="submit-button"
-            onClick={handleSubmit}
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? (
-              <>
-                <div className="spinner"></div> Enviando...
-              </>
-            ) : (
-              <>
-                <Check size={16} /> Confirmar y Enviar
-              </>
-            )}
-          </button>
-        </div>
-      </div>
-
-      <div className="preview-content">
-        <div className="preview-section">
-          <h3>Información Básica</h3>
-          <p><strong>Brigada:</strong> {formData.nombreBrigada}</p>
-          <p><strong>Bomberos Activos:</strong> {formData.cantidadBomberosActivos}</p>
-          <p><strong>Comandante:</strong> {formData.contactoCelularComandante}</p>
-          <p><strong>Logística:</strong> {formData.encargadoLogistica}</p>
-        </div>
-
-        <div className="preview-section">
-          <h3>Resumen de Necesidades</h3>
-          <div className="preview-lists">
-            {['herramientas', 'logistica', 'alimentacion', 'limpieza', 'medicamentos'].map(listName => (
-              <div key={listName} className="preview-list">
-                <h4>{listName.charAt(0).toUpperCase() + listName.slice(1)}</h4>
-                {formData[listName].filter(item => item.nombre || item.cantidad).map(item => (
-                  <div key={item.id} className="preview-item">
-                    <span>{item.nombre}</span>
-                    <span>Cantidad: {item.cantidad}</span>
-                    {item.observaciones && <span>Obs: {item.observaciones}</span>}
-                  </div>
-                ))}
-              </div>
-            ))}
-          </div>
-        </div>
+      <div className="observations-input">
+        <label>Observaciones</label>
+        <input
+          type="text"
+          value={formData[itemKey]?.observaciones || ''}
+          onChange={(e) => handleInputChange(itemKey, 'observaciones', e.target.value)}
+        />
       </div>
     </div>
   );
 
-  if (showPreview) {
-    return renderPreview();
-  }
+  const renderQuantityInput = (itemKey, label) => (
+    <div className="quantity-input-row">
+      <label>{label}</label>
+      <div className="quantity-obs-group">
+        <input
+          type="number"
+          value={formData[itemKey]?.cantidad || ''}
+          onChange={(e) => handleInputChange(itemKey, 'cantidad', e.target.value)}
+          placeholder="Cantidad"
+        />
+        <input
+          type="text"
+          value={formData[itemKey]?.observaciones || ''}
+          onChange={(e) => handleInputChange(itemKey, 'observaciones', e.target.value)}
+          placeholder="Observaciones"
+        />
+      </div>
+    </div>
+  );
 
   return (
     <div className="formulario-container">
-      <div className="form-header">
-        <h1>Formulario de Recopilación de Necesidades - Bomberos Forestales</h1>
-        <div className="form-actions">
-          <button 
-            type="button" 
-            className="preview-button"
-            onClick={() => setShowPreview(true)}
-          >
-            <Eye size={16} /> Vista Previa
-          </button>
-        </div>
-      </div>
+      <h1>Formulario de Recopilación de Necesidades - Bomberos Forestales</h1>
       
-      <div className="form-container">
+      <div className="form-container" onSubmit={handleSubmit}>
         {/* Información Básica */}
         <section className="form-section">
           <h2>Información Básica de la Brigada</h2>
-          {renderBasicInput('Nombre de la Brigada', 'nombreBrigada', '', true)}
-          {renderBasicInput('Cantidad de Bomberos Activos', 'cantidadBomberosActivos', '', true)}
-          {renderBasicInput('Contacto Celular Comandante', 'contactoCelularComandante', '', true)}
+          {renderBasicInput('Nombre de la Brigada', 'nombreBrigada')}
+          {renderBasicInput('Cantidad de Bomberos Activos', 'cantidadBomberosActivos')}
+          {renderBasicInput('Contacto Celular Comandante', 'contactoCelularComandante')}
           {renderBasicInput('Encargado de Logística', 'encargadoLogistica')}
           {renderBasicInput('Contacto Celular Logística', 'contactoCelularLogistica')}
           {renderBasicInput('Número de Emergencia Público', 'numeroEmergenciaPublico')}
@@ -389,65 +191,144 @@ const FormularioNecesidades = () => {
         {/* EPP - Ropa */}
         <section className="form-section">
           <h2>Equipamiento EPP - Ropa</h2>
-          {renderSizeInputsWithCRUD('camisasForestales', 'Camisa Forestal', ['xs', 's', 'm', 'l', 'xl'])}
-          {renderSizeInputsWithCRUD('pantalonesForestales', 'Pantalón Forestal', ['xs', 's', 'm', 'l', 'xl'])}
-          {renderSizeInputsWithCRUD('overolesFr', 'Overol FR', ['xs', 's', 'm', 'l', 'xl'])}
+          <div className="epp-item">
+            <h3>Camisa Forestal</h3>
+            {renderSizeInputs('camisaForestal')}
+          </div>
+          <div className="epp-item">
+            <h3>Pantalón Forestal</h3>
+            {renderSizeInputs('pantalonForestal')}
+          </div>
+          <div className="epp-item">
+            <h3>Overol FR</h3>
+            {renderSizeInputs('overolFr')}
+          </div>
         </section>
 
         {/* Calzado */}
         <section className="form-section">
           <h2>Calzado y Guantes</h2>
-          {renderSizeInputsWithCRUD('botasBomberos', 'Botas para Bomberos Forestales', ['t37', 't38', 't39', 't40', 't41', 't42', 't43', 'otraTalla'])}
-          {renderSizeInputsWithCRUD('guantesCuero', 'Guantes de Cuero', ['xs', 's', 'm', 'l', 'xl', 'xxl', 'otraTalla'])}
+          <div className="epp-item">
+            <h3>Botas para Bomberos Forestales</h3>
+            {renderSizeInputs('botasBomberos', ['t37', 't38', 't39', 't40', 't41', 't42', 't43', 'otraTalla'])}
+          </div>
+          <div className="epp-item">
+            <h3>Guantes de Cuero</h3>
+            {renderSizeInputs('guantesCuero', ['xs', 's', 'm', 'l', 'xl', 'xxl', 'otraTalla'])}
+          </div>
         </section>
 
         {/* Equipamiento EPP */}
         <section className="form-section">
           <h2>Equipamiento EPP</h2>
-          {renderQuantityInputWithCRUD('esclavinas', 'Esclavina')}
-          {renderQuantityInputWithCRUD('linternas', 'Linterna')}
-          {renderQuantityInputWithCRUD('antiparras', 'Antiparra')}
-          {renderQuantityInputWithCRUD('cascosForestales', 'Casco Forestal Ala Ancha')}
-          {renderQuantityInputWithCRUD('mascarasPolvo', 'Máscara para Polvo y Partículas')}
-          {renderQuantityInputWithCRUD('mascarasMediaCara', 'Máscara Media Cara')}
+          {renderQuantityInput('esclavina', 'Esclavina')}
+          {renderQuantityInput('linterna', 'Linterna')}
+          {renderQuantityInput('antiparra', 'Antiparra')}
+          {renderQuantityInput('cascoForestal', 'Casco Forestal Ala Ancha')}
+          {renderQuantityInput('mascaraPolvo', 'Máscara para Polvo y Partículas')}
+          {renderQuantityInput('mascaraMediaCara', 'Máscara Media Cara')}
         </section>
 
-        {/* Secciones Dinámicas */}
+        {/* Herramientas */}
         <section className="form-section">
           <h2>Herramientas</h2>
-          {renderDynamicList('herramientas', 'Herramientas')}
+          {renderQuantityInput('linternasCabeza', 'Linternas de Cabeza')}
+          {renderQuantityInput('pilasAA', 'Pilas AA')}
+          {renderQuantityInput('pilasAAA', 'Pilas AAA')}
+          {renderQuantityInput('azadon', 'Azadón')}
+          {renderQuantityInput('palaMangoFibra', 'Pala con Mango de Fibra')}
+          {renderQuantityInput('rastrilloMangoFibra', 'Rastrillo Mango de Fibra')}
+          {renderQuantityInput('mcleodMangoFibra', 'McLeod Mango de Fibra')}
+          {renderQuantityInput('batefuego', 'Batefuego')}
+          {renderQuantityInput('gorgui', 'Gorgui')}
+          {renderQuantityInput('pulaskyMangoFibra', 'Pulasky con Mango de Fibra')}
+          {renderQuantityInput('quemadorGoteo', 'Quemador de Goteo')}
+          {renderQuantityInput('mochilaForestal', 'Mochila Forestal')}
+          {renderQuantityInput('escobetaAlambre', 'Escobeta de Alambre')}
         </section>
 
+        {/* Logística - Repuestos */}
         <section className="form-section">
-          <h2>Logística - Repuestos y Combustible</h2>
-          {renderDynamicList('logistica', 'Logística')}
+          <h2>Logística - Repuestos Vehículos y Combustible</h2>
+          {renderQuantityInput('gasolina', 'Gasolina')}
+          {renderQuantityInput('diesel', 'Diésel')}
+          {renderQuantityInput('amortiguadores', 'Amortiguadores')}
+          {renderQuantityInput('prensaDisco', 'Prensa Disco')}
+          {renderQuantityInput('rectificacionFreno', 'Rectificación de Frenos')}
+          {renderQuantityInput('llantas', 'Llantas')}
+          {renderQuantityInput('aceiteMotor', 'Aceite de Motor')}
+          {renderQuantityInput('grasa', 'Grasa')}
+          {renderQuantityInput('cambioAceite', 'Cambio de Aceite')}
+          {renderQuantityInput('otroArreglo', 'Otro Tipo de Arreglo')}
         </section>
 
+        {/* Alimentación */}
         <section className="form-section">
           <h2>Alimentación y Bebidas</h2>
-          {renderDynamicList('alimentacion', 'Alimentación')}
+          {renderQuantityInput('alimentosBebidas', 'Alimentos y Bebidas')}
+          {renderQuantityInput('agua', 'Agua')}
+          {renderQuantityInput('rehidratantes', 'Rehidratantes')}
+          {renderQuantityInput('barrasEnergizantes', 'Barras Energizantes')}
+          {renderQuantityInput('lataAtun', 'Lata de Atún')}
+          {renderQuantityInput('lataFrejol', 'Lata de Frejol')}
+          {renderQuantityInput('lataViandada', 'Lata de Viandada')}
+          {renderQuantityInput('lataChorizo', 'Lata de Chorizo')}
+          {renderQuantityInput('refrescoSobres', 'Refresco en Sobres')}
+          {renderQuantityInput('lechePolvo', 'Leche Polvo')}
+          {renderQuantityInput('frutosSecos', 'Frutos Secos')}
+          {renderQuantityInput('pastillasMenta', 'Pastillas de Menta o Dulces')}
+          {renderQuantityInput('alimentosNoPerecibles', 'Alimentos No Perecederos')}
         </section>
 
+        {/* Logística y Equipo de Campo */}
         <section className="form-section">
-          <h2>Limpieza</h2>
-          {renderDynamicList('limpieza', 'Limpieza')}
+          <h2>Logística y Equipo de Campo</h2>
+          {renderQuantityInput('colchoneta', 'Colchoneta')}
+          {renderQuantityInput('sleeping', 'Sleeping')}
+          {renderQuantityInput('camping', 'Camping')}
         </section>
 
+        {/* Limpieza Personal */}
+        <section className="form-section">
+          <h2>Limpieza Personal</h2>
+          {renderQuantityInput('shampoo', 'Shampoo Envase Pequeños o Sachet')}
+          {renderQuantityInput('jaboncillos', 'Jaboncillos')}
+          {renderQuantityInput('pastaDental', 'Pasta Dental')}
+          {renderQuantityInput('cepilloDientes', 'Cepillo de Dientes')}
+          {renderQuantityInput('toallasHumedas', 'Toallas Húmedas')}
+          {renderQuantityInput('toallasHigienicas', 'Toallas Higiénicas')}
+          {renderQuantityInput('papelHigienico', 'Papel Higiénico')}
+        </section>
+
+        {/* Limpieza General */}
+        <section className="form-section">
+          <h2>Limpieza General</h2>
+          {renderQuantityInput('ace', 'Ace')}
+          {renderQuantityInput('lavandina', 'Lavandina')}
+        </section>
+
+        {/* Medicamentos */}
         <section className="form-section">
           <h2>Medicamentos</h2>
-          {renderDynamicList('medicamentos', 'Medicamentos')}
+          {renderQuantityInput('aguaDestilada', 'Agua Destilada 5 ML')}
+          {renderQuantityInput('aguaOxigenada', 'Agua Oxigenada')}
+          {renderQuantityInput('alcohol', 'Alcohol')}
+          {renderQuantityInput('algodon', 'Algodón')}
+          {renderQuantityInput('amoxicilina', 'Amoxicilina 1 Gramo')}
+          {renderQuantityInput('bacitracina', 'Bacitracina Neomicina Pomada')}
+          {renderQuantityInput('branula18', 'Bránula 18')}
         </section>
 
-        <div className="form-footer">
-          <button 
-            type="button" 
-            className="preview-button"
-            onClick={() => setShowPreview(true)}
-          >
-            <Eye size={16} /> Vista Previa
-          </button>
-        </div>
-      </div>
+        {/* Rescate Animal */}
+        <section className="form-section">
+          <h2>Rescate Animal</h2>
+          {renderQuantityInput('alimentosAnimales', 'Alimentos para Animales')}
+        </section>
+
+        <button type="submit" className="submit-button">
+          Enviar Formulario de Necesidades
+        </button>
+              </div>
     </div>
   );
 };

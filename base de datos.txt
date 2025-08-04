@@ -1,0 +1,131 @@
+CREATE DATABASE Inventario;
+
+USE Inventario;
+
+CREATE TABLE Brigadas (
+    ID_Brigada INT IDENTITY(1,1) PRIMARY KEY,
+    Nombre_Brigada NVARCHAR(255) NOT NULL,
+    Cantidad_Bomberos_Activos INT,
+    Contacto_Celular_Comandante NVARCHAR(20),
+    Encargado_Logistica NVARCHAR(255),
+    Contacto_Celular_Logistica NVARCHAR(20),
+    Numero_Emergencia_Publico NVARCHAR(20),
+    Fecha_Registro DATETIME DEFAULT GETDATE(),
+    Estado BIT DEFAULT 1
+);
+
+-- =============================================
+-- TABLA MAESTRA: CATEGORIAS DE EQUIPAMIENTO
+-- =============================================
+CREATE TABLE Categorias_Equipamiento (
+    ID_Categoria INT IDENTITY(1,1) PRIMARY KEY,
+    Nombre_Categoria NVARCHAR(100) NOT NULL,
+    Descripcion NVARCHAR(255),
+    Estado BIT DEFAULT 1
+);
+
+-- =============================================
+-- TABLA MAESTRA: TIPOS DE EQUIPAMIENTO
+-- =============================================
+CREATE TABLE Tipos_Equipamiento (
+    ID_Tipo_Equipamiento INT IDENTITY(1,1) PRIMARY KEY,
+    ID_Categoria INT FOREIGN KEY REFERENCES Categorias_Equipamiento(ID_Categoria),
+    Nombre_Tipo NVARCHAR(150) NOT NULL,
+    Descripcion NVARCHAR(255),
+    Requiere_Talla BIT DEFAULT 0,
+    Requiere_Monto BIT DEFAULT 0, -- Para logística vehículos
+    Unidad_Medida NVARCHAR(20), -- unidades, kg, litros, etc.
+    Estado BIT DEFAULT 1
+);
+
+-- =============================================
+-- TABLA PRINCIPAL: EQUIPAMIENTO (SIN TALLAS)
+-- =============================================
+CREATE TABLE Equipamiento (
+    ID_Equipamiento INT IDENTITY(1,1) PRIMARY KEY,
+    ID_Brigada INT FOREIGN KEY REFERENCES Brigadas(ID_Brigada),
+    ID_Tipo_Equipamiento INT FOREIGN KEY REFERENCES Tipos_Equipamiento(ID_Tipo_Equipamiento),
+    Cantidad_Total INT DEFAULT 0,
+    Monto_Aproximado DECIMAL(10,2) NULL,
+    Observaciones NVARCHAR(500),
+    Fecha_Actualizacion DATETIME DEFAULT GETDATE(),
+    Usuario_Actualizacion NVARCHAR(100),
+    Estado BIT DEFAULT 1
+);
+
+-- =============================================
+-- TABLA: EQUIPAMIENTO POR TALLAS (FLEXIBLE)
+-- =============================================
+CREATE TABLE Equipamiento_Tallas (
+    ID_Equipamiento_Talla INT IDENTITY(1,1) PRIMARY KEY,
+    ID_Equipamiento INT FOREIGN KEY REFERENCES Equipamiento(ID_Equipamiento),
+    Talla NVARCHAR(10) NOT NULL, -- XS, S, M, L, XL, XXL, 37, 38, 39, etc.
+    Cantidad INT DEFAULT 0,
+    Fecha_Actualizacion DATETIME DEFAULT GETDATE(),
+    UNIQUE(ID_Equipamiento, Talla) -- Una talla por equipamiento
+);
+
+-- =============================================
+-- TABLA: ALIMENTACIÓN Y BEBIDAS
+-- =============================================
+CREATE TABLE Alimentacion_Bebidas (
+    ID_Alimentacion INT IDENTITY(1,1) PRIMARY KEY,
+    ID_Brigada INT FOREIGN KEY REFERENCES Brigadas(ID_Brigada),
+    Tipo_Alimento_Bebida NVARCHAR(100) NOT NULL,
+    Cantidad INT DEFAULT 0,
+    Unidad_Medida NVARCHAR(20),
+    Observaciones NVARCHAR(500),
+    Fecha_Actualizacion DATETIME DEFAULT GETDATE()
+);
+
+-- =============================================
+-- TABLA: LOGÍSTICA Y EQUIPO DE CAMPO
+-- =============================================
+CREATE TABLE Logistica_Campo (
+    ID_Campo INT IDENTITY(1,1) PRIMARY KEY,
+    ID_Brigada INT FOREIGN KEY REFERENCES Brigadas(ID_Brigada),
+    Tipo_Equipo NVARCHAR(100) NOT NULL,
+    Cantidad INT DEFAULT 0,
+    Observaciones NVARCHAR(500),
+    Fecha_Actualizacion DATETIME DEFAULT GETDATE()
+);
+
+-- =============================================
+-- TABLA: MEDICAMENTOS
+-- =============================================
+CREATE TABLE Medicamentos (
+    ID_Medicamento INT IDENTITY(1,1) PRIMARY KEY,
+    ID_Brigada INT FOREIGN KEY REFERENCES Brigadas(ID_Brigada),
+    Nombre_Medicamento NVARCHAR(150) NOT NULL,
+    Cantidad INT DEFAULT 0,
+    Unidad_Medida NVARCHAR(20),
+    Fecha_Vencimiento DATE,
+    Observaciones NVARCHAR(500),
+    Fecha_Actualizacion DATETIME DEFAULT GETDATE()
+);
+
+-- =============================================
+-- TABLA: RESCATE ANIMAL
+-- =============================================
+CREATE TABLE Rescate_Animal (
+    ID_Rescate_Animal INT IDENTITY(1,1) PRIMARY KEY,
+    ID_Brigada INT FOREIGN KEY REFERENCES Brigadas(ID_Brigada),
+    Tipo_Alimento_Animal NVARCHAR(100) NOT NULL,
+    Cantidad INT DEFAULT 0,
+    Unidad_Medida NVARCHAR(20),
+    Observaciones NVARCHAR(500),
+    Fecha_Actualizacion DATETIME DEFAULT GETDATE()
+);
+
+-- =============================================
+-- TABLA MAESTRA: TALLAS ESTÁNDAR (OPCIONAL)
+-- =============================================
+CREATE TABLE Tallas_Estandar (
+    ID_Talla INT IDENTITY(1,1) PRIMARY KEY,
+    Codigo_Talla NVARCHAR(10) NOT NULL UNIQUE,
+    Descripcion_Talla NVARCHAR(50),
+    Tipo_Talla NVARCHAR(20), -- 'LETRAS', 'NUMEROS'
+    Orden_Talla INT,
+    Estado BIT DEFAULT 1
+);
+ 

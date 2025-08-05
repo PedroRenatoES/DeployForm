@@ -1,4 +1,4 @@
-:root {
+/* :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
@@ -66,3 +66,168 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+ */
+
+
+
+
+
+
+
+
+
+ :root {
+  --primary: #e74c3c;
+  --primary-dark: #c0392b;
+  --secondary: #3498db;
+  --light: #ecf0f1;
+  --dark: #2c3e50;
+  --success: #27ae60;
+}
+
+body {
+  font-family: 'Open Sans', sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f8f9fa;
+}
+
+/* Barra de progreso */
+.progress-container {
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+  margin: 2rem 0;
+}
+
+.progress-line {
+  position: absolute;
+  height: 4px;
+  background: var(--light);
+  top: 20px;
+  left: 0;
+  right: 0;
+  z-index: -1;
+}
+
+.progress-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 1;
+}
+
+.step-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: white;
+  border: 3px solid var(--light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  color: var(--dark);
+  transition: all 0.3s ease;
+}
+
+.progress-step.current .step-icon {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: white;
+  transform: scale(1.1);
+}
+
+.progress-step.completed .step-icon {
+  border-color: var(--success);
+  background: var(--success);
+  color: white;
+}
+
+.step-label {
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+  text-align: center;
+  color: var(--dark);
+}
+
+/* Sistema de cards */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin: 2rem 0;
+}
+
+.card {
+  background: white;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  border: 2px solid transparent;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+}
+
+.card.selected {
+  border-color: var(--primary);
+  background-color: rgba(231, 76, 60, 0.05);
+}
+
+.card-icon {
+  background: var(--light);
+  padding: 1.5rem;
+  display: flex;
+  justify-content: center;
+  font-size: 2rem;
+  color: var(--primary);
+}
+
+.card h3 {
+  margin: 1rem;
+  color: var(--dark);
+}
+
+.card p {
+  margin: 0 1rem 1.5rem;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.quantity-selector {
+  padding: 1rem;
+  background: #f8f9fa;
+  border-top: 1px solid #eee;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Animación de éxito */
+.success-animation {
+  text-align: center;
+  padding: 3rem;
+}
+
+.success-icon {
+  font-size: 5rem;
+  color: var(--success);
+  margin-bottom: 1.5rem;
+}
+
+@keyframes checkmark {
+  0% { transform: scale(0); }
+  70% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+.success-animation h2 {
+  color: var(--success);
+  margin-bottom: 1rem;
+}
+

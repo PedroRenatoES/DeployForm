@@ -37,6 +37,10 @@ const BomberosApp = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+    // ✅ COMPONENTE CORREGIDO - BoardView con funcionalidad completa
+const [detalleBrigada, setDetalleBrigada] = useState(null);
+const [mostrarModal, setMostrarModal] = useState(false);
+
   // Estados para el formulario
   const [currentStep, setCurrentStep] = useState(0);
   const [formData, setFormData] = useState({
@@ -70,17 +74,33 @@ const BomberosApp = () => {
     loadCatalogos();
   }, []);
 
+  // ✅ FUNCIÓN CORREGIDA - La clave del problema
   const loadBrigadas = async () => {
     try {
       setLoading(true);
       setError(null);
+      
+      console.log('🔄 Cargando brigadas...');
       const response = await apiService.getBrigadas();
-      if (response.success) {
+      console.log('📦 Respuesta completa:', response);
+      
+      // Tu API devuelve la estructura directamente, no response.success
+      // Verificar si la respuesta tiene la estructura esperada
+      if (response && response.data) {
         setBrigadas(response.data);
+        console.log('✅ Brigadas cargadas:', response.data);
+      } else if (Array.isArray(response)) {
+        // Si la respuesta es directamente un array
+        setBrigadas(response);
+        console.log('✅ Brigadas cargadas (array directo):', response);
+      } else {
+        console.warn('⚠️ Estructura de respuesta inesperada:', response);
+        setBrigadas([]);
       }
     } catch (error) {
-      console.error('Error loading brigadas:', error);
-      setError('Error al cargar las brigadas');
+      console.error('❌ Error loading brigadas:', error);
+      setError(`Error al cargar las brigadas: ${error.message}`);
+      setBrigadas([]); // Asegurar que brigadas sea un array
     } finally {
       setLoading(false);
     }
@@ -88,10 +108,12 @@ const BomberosApp = () => {
 
   const loadCatalogos = async () => {
     try {
+      console.log('🔄 Cargando catálogos...');
       const catalogos = await apiService.getAllCatalogos();
+      console.log('📦 Catálogos cargados:', catalogos);
       setCatalogos(catalogos);
     } catch (error) {
-      console.error('Error loading catalogos:', error);
+      console.error('❌ Error loading catalogos:', error);
     }
   };
 
@@ -112,47 +134,80 @@ const BomberosApp = () => {
     setCurrentView('form');
   };
 
+  // ✅ FUNCIÓN CORREGIDA - Crear brigada
   const handleSubmitForm = async () => {
     try {
       setLoading(true);
+      setError(null);
       
-      // Crear brigada primero
       const brigadaData = {
         nombre: formData.brigada.nombre,
         descripcion: formData.brigada.descripcion,
         activo: formData.brigada.activo
       };
 
+      console.log('💾 Guardando brigada:', brigadaData);
       const response = await apiService.createBrigada(brigadaData);
+      console.log('✅ Brigada guardada:', response);
       
-      if (response.success) {
+      // Tu API puede devolver diferentes estructuras
+      if (response) {
         setShowSuccessAnimation(true);
         setTimeout(() => {
           setShowSuccessAnimation(false);
           setCurrentView('board');
-          loadBrigadas();
+          loadBrigadas(); // Recargar la lista
         }, 2000);
       }
     } catch (error) {
-      console.error('Error submitting form:', error);
-      setError('Error al guardar la brigada');
+      console.error('❌ Error submitting form:', error);
+      setError(`Error al guardar la brigada: ${error.message}`);
     } finally {
       setLoading(false);
     }
   };
 
+  // ✅ FUNCIÓN CORREGIDA - Eliminar brigada
   const handleDeleteBrigada = async (id) => {
     if (window.confirm('¿Estás seguro de que deseas eliminar esta brigada?')) {
       try {
+        console.log('🗑️ Eliminando brigada:', id);
         const response = await apiService.deleteBrigada(id);
-        if (response.success) {
-          loadBrigadas();
-        }
+        console.log('✅ Brigada eliminada:', response);
+        
+        // Recargar la lista después de eliminar
+        await loadBrigadas();
       } catch (error) {
-        console.error('Error deleting brigada:', error);
-        setError('Error al eliminar la brigada');
+        console.error('❌ Error deleting brigada:', error);
+        setError(`Error al eliminar la brigada: ${error.message}`);
       }
     }
+  };
+
+  // ✅ NUEVAS FUNCIONES - Para Ver y Editar
+  const handleViewBrigada = (brigada) => {
+    setSelectedBrigada(brigada);
+    console.log('👁️ Viendo brigada:', brigada);
+    // Aquí puedes implementar un modal de vista o navegar a otra página
+  };
+
+  const handleEditBrigada = (brigada) => {
+    setSelectedBrigada(brigada);
+    setFormData({
+      brigada: {
+        nombre: brigada.nombre,
+        descripcion: brigada.descripcion || '',
+        activo: brigada.activo !== undefined ? brigada.activo : true
+      },
+      equipamiento: {
+        ropa: [],
+        botas: [],
+        guantes: []
+      }
+    });
+    setCurrentStep(0);
+    setCurrentView('form');
+    console.log('✏️ Editando brigada:', brigada);
   };
 
   const nextStep = () => {
@@ -271,7 +326,8 @@ const BomberosApp = () => {
     </div>
   );
 
-  // Componente de Board
+
+
   const BoardView = () => (
     <div className="board-container">
       <div className="board-header">
@@ -282,51 +338,134 @@ const BomberosApp = () => {
         </button>
       </div>
       
-      {loading && <p>Cargando brigadas...</p>}
-      {error && <p className="error-message">{error}</p>}
+      {loading && (
+        <div className="loading-container">
+          <p>Cargando brigadas...</p>
+        </div>
+      )}
+      
+      {error && (
+        <div className="error-container">
+          <p className="error-message">{error}</p>
+          <button onClick={loadBrigadas} className="retry-button">
+            Reintentar
+          </button>
+        </div>
+      )}
+      
+      {/* Debug info - remover en producción */}
+      {!loading && (
+        <div className="debug-info" style={{padding: '10px', background: '#f0f0f0', margin: '10px 0', fontSize: '12px'}}>
+          <strong>Debug:</strong> Total brigadas: {brigadas.length} | 
+          Estado loading: {loading.toString()} | 
+          Error: {error || 'ninguno'}
+        </div>
+      )}
       
       <div className="cards-grid">
-        {brigadas.map((brigada) => (
-          <div key={brigada.id} className="brigada-card">
-            <div className="card-header">
-              <h3>{brigada.nombre}</h3>
-              <div className="card-actions">
-                <button className="action-btn view" title="Ver detalles">
-                  <Eye size={16} />
-                </button>
-                <button className="action-btn edit" title="Editar">
-                  <Edit3 size={16} />
-                </button>
-                <button 
-                  className="action-btn delete" 
-                  title="Eliminar"
-                  onClick={() => handleDeleteBrigada(brigada.id)}
-                >
-                  <Trash size={16} />
-                </button>
-              </div>
+        {!loading && brigadas.length === 0 && !error && (
+          <div className="empty-state">
+            <FileText size={48} />
+            <h3>No hay brigadas registradas</h3>
+            <p>Crea tu primera brigada para comenzar</p>
+            <button className="create-button" onClick={handleCreateForm}>
+              <Plus size={20} />
+              Crear Primera Brigada
+            </button>
+          </div>
+        )}
+        
+      {brigadas.map((brigada) => (
+        <div key={brigada.id} className="brigada-card">
+          <div className="card-header">
+            <h3>{brigada.nombre_brigada}</h3>
+            <div className="card-actions">
+              <button 
+                className="action-btn view" 
+                title="Ver detalles"
+                onClick={() => {
+                if (!brigada?.id) {
+                  console.warn("❗ brigada.id no está definido");
+                  return;
+                }
+
+                fetch(`/api/brigadas/${brigada.id}`)
+                  .then(async res => {
+                    const contentType = res.headers.get("content-type");
+                    if (!contentType || !contentType.includes("application/json")) {
+                      const text = await res.text();
+                      console.error("⚠️ Respuesta no JSON:", text);
+                      throw new Error("Respuesta no es JSON");
+                    }
+                    return res.json();
+                  })
+                  .then(data => {
+                    console.log("📦 Detalles recibidos:", data);
+                    if (data.success && data.data) {
+                      setDetalleBrigada(data.data);
+                      setMostrarModal(true);
+                    }
+                  })
+                  .catch(err => {
+                    console.error("❌ Error al obtener detalles:", err);
+                  });
+              }}
+
+              >
+                <Eye size={16} />
+              </button>
+
+              <button 
+                className="action-btn edit" 
+                title="Editar"
+                onClick={() => handleEditBrigada(brigada)}
+              >
+                <Edit3 size={16} />
+              </button>
+              <button 
+                className="action-btn delete" 
+                title="Eliminar"
+                onClick={() => handleDeleteBrigada(brigada.id)}
+              >
+                <Trash size={16} />
+              </button>
             </div>
-            
-            <div className="card-content">
-              <div className="info-row">
-                <span className="label">Descripción:</span>
-                <span className="value">{brigada.descripcion || 'Sin descripción'}</span>
-              </div>
-              <div className="info-row">
-                <span className="label">Estado:</span>
-                <span className={`status ${brigada.activo ? 'active' : 'inactive'}`}>
-                  {brigada.activo ? 'Activo' : 'Inactivo'}
-                </span>
-              </div>
+          </div>
+
+          <div className="card-content">
+            <div className="info-row">
+              <span className="label">Cel. Comandante:</span>
+              <span className="value">{brigada.contacto_celular_comandante || 'No especificado'}</span>
             </div>
-            
-            <div className="card-footer">
-              <span className="date">
-                {brigada.createdAt ? new Date(brigada.createdAt).toLocaleDateString() : 'Sin fecha'}
+            <div className="info-row">
+              <span className="label">Encargado Logística:</span>
+              <span className="value">{brigada.encargado_logistica || 'No asignado'}</span>
+            </div>
+            <div className="info-row">
+              <span className="label">Cel. Logística:</span>
+              <span className="value">{brigada.contacto_celular_logistica || 'No especificado'}</span>
+            </div>
+            <div className="info-row">
+              <span className="label">Nro. Emergencia:</span>
+              <span className="value">{brigada.numero_emergencia_publico || 'No definido'}</span>
+            </div>
+            <div className="info-row">
+              <span className="label">Estado:</span>
+              <span className={`status ${brigada.activo ? 'active' : 'inactive'}`}>
+                {brigada.activo ? 'Activo' : 'Inactivo'}
               </span>
             </div>
           </div>
-        ))}
+
+          <div className="card-footer">
+            <span className="date">
+              {brigada.fecha_registro ? new Date(brigada.fecha_registro).toLocaleDateString() : 'Sin fecha'}
+            </span>
+          </div>
+
+        </div>
+))}
+
       </div>
     </div>
   );
@@ -334,42 +473,41 @@ const BomberosApp = () => {
   // Componente de Progress Bar
   const ProgressBar = () => (
     <div className="progress-container">
-  <div className="progress-header">
-    <h2>Progreso del Formulario</h2>
-    <span className="progress-text">
-      Paso {currentStep + 1} de {steps.length}
-    </span>
-  </div>
-
-  <div className="progress-bar">
-    <div 
-      className="progress-fill"
-      style={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
-    ></div>
-  </div>
-
-  <div className="steps-indicators">
-    {steps.map((step, index) => (
-      <div 
-        key={step.id}
-        className={`step-indicator ${index <= currentStep ? 'completed' : ''} ${index === currentStep ? 'current' : ''}`}
-      >
-        <div className={`step-circle ${step.color}`}>
-          <step.icon size={16} />
-        </div>
-        <span className="step-title">{step.title}</span>
+      <div className="progress-header">
+        <h2>Progreso del Formulario</h2>
+        <span className="progress-text">
+          Paso {currentStep + 1} de {steps.length}
+        </span>
       </div>
-    ))}
-  </div>
-</div>
 
+      <div className="progress-bar">
+        <div 
+          className="progress-fill"
+          style={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
+        ></div>
+      </div>
+
+      <div className="steps-indicators">
+        {steps.map((step, index) => (
+          <div 
+            key={step.id}
+            className={`step-indicator ${index <= currentStep ? 'completed' : ''} ${index === currentStep ? 'current' : ''}`}
+          >
+            <div className={`step-circle ${step.color}`}>
+              <step.icon size={16} />
+            </div>
+            <span className="step-title">{step.title}</span>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 
   // Componente de Step 0 - Información General
   const InformacionGeneralStep = () => (
     <div className="form-step">
       <div className="step-header">
-        <h2>Información General de la Brigada</h2>
+        <h2>{selectedBrigada ? 'Editar Brigada' : 'Información General de la Brigada'}</h2>
         <p>Proporciona los datos básicos de la brigada de bomberos</p>
       </div>
       
@@ -412,6 +550,8 @@ const BomberosApp = () => {
   );
 
   // Componente de Form View
+
+
   const FormView = () => (
     <div className="form-container">
       <ProgressBar />
@@ -441,6 +581,14 @@ const BomberosApp = () => {
       <div className="form-navigation">
         <button 
           className="nav-btn secondary" 
+          onClick={() => setCurrentView('board')}
+        >
+          <X size={20} />
+          Cancelar
+        </button>
+        
+        <button 
+          className="nav-btn secondary" 
           onClick={prevStep}
           disabled={currentStep === 0}
         >
@@ -464,7 +612,7 @@ const BomberosApp = () => {
             disabled={loading || !formData.brigada.nombre}
           >
             <Save size={20} />
-            {loading ? 'Guardando...' : 'Guardar Formulario'}
+            {loading ? 'Guardando...' : (selectedBrigada ? 'Actualizar' : 'Guardar Formulario')}
           </button>
         )}
       </div>
@@ -479,7 +627,7 @@ const BomberosApp = () => {
           <Check size={48} />
         </div>
         <h2>¡Formulario Enviado!</h2>
-        <p>La brigada ha sido registrada exitosamente</p>
+        <p>La brigada ha sido {selectedBrigada ? 'actualizada' : 'registrada'} exitosamente</p>
       </div>
     </div>
   );
@@ -502,6 +650,22 @@ const BomberosApp = () => {
       </main>
       
       {showSuccessAnimation && <SuccessAnimation />}
+
+      {mostrarModal && detalleBrigada && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h2>Detalles de la Brigada</h2>
+            <p><strong>Nombre:</strong> {detalleBrigada.nombre_brigada}</p>
+            <p><strong>Comandante:</strong> {detalleBrigada.contacto_celular_comandante}</p>
+            <p><strong>Logística:</strong> {detalleBrigada.encargado_logistica}</p>
+            <p><strong>Cel. Logística:</strong> {detalleBrigada.contacto_celular_logistica}</p>
+            <p><strong>Emergencia:</strong> {detalleBrigada.numero_emergencia_publico}</p>
+            <button className="modal-close" onClick={() => setMostrarModal(false)}>Cerrar</button>
+          </div>
+        </div>
+      )}
+
+
     </div>
   );
 };

@@ -66,9 +66,12 @@ class ApiService {
 
   async createBrigada(brigadaData) {
     const backendData = {
-      nombre: brigadaData.nombre,
-      descripcion: brigadaData.descripcion || '',
-      activo: brigadaData.activo !== undefined ? brigadaData.activo : true
+      NombreBrigada: brigadaData.NombreBrigada,
+      CantidadBomberosActivos: brigadaData.CantidadBomberosActivos,
+      ContactoCelularComandante: brigadaData.ContactoCelularComandante,
+      EncargadoLogistica: brigadaData.EncargadoLogistica,
+      ContactoCelularLogistica: brigadaData.ContactoCelularLogistica,
+      NumeroEmergenciaPublico: brigadaData.NumeroEmergenciaPublico
     };
 
     console.log('📝 Creating brigada:', backendData);
@@ -81,9 +84,12 @@ class ApiService {
 
   async updateBrigada(id, brigadaData) {
     const backendData = {
-      nombre: brigadaData.nombre,
-      descripcion: brigadaData.descripcion || '',
-      activo: brigadaData.activo !== undefined ? brigadaData.activo : true
+      NombreBrigada: brigadaData.NombreBrigada,
+      CantidadBomberosActivos: brigadaData.CantidadBomberosActivos,
+      ContactoCelularComandante: brigadaData.ContactoCelularComandante,
+      EncargadoLogistica: brigadaData.EncargadoLogistica,
+      ContactoCelularLogistica: brigadaData.ContactoCelularLogistica,
+      NumeroEmergenciaPublico: brigadaData.NumeroEmergenciaPublico
     };
 
     return this.request(`/brigadas/${id}`, {
@@ -103,24 +109,40 @@ class ApiService {
     return this.request('/catalogos/tipos-ropa');
   }
 
-  async createTipoRopa(itemData) {
-    return this.request('/catalogos/tipos-ropa', {
-      method: 'POST',
-      body: JSON.stringify(itemData),
-    });
+  async getEquipamientoEPP() {
+    return this.request('/catalogos/equipamiento-epp');
   }
 
-  async updateTipoRopa(id, itemData) {
-    return this.request(`/catalogos/tipos-ropa/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(itemData),
-    });
+  async getHerramientas() {
+    return this.request('/catalogos/herramientas');
   }
 
-  async deleteTipoRopa(id) {
-    return this.request(`/catalogos/tipos-ropa/${id}`, {
-      method: 'DELETE',
-    });
+  async getServiciosVehiculos() {
+    return this.request('/catalogos/servicios-vehiculos');
+  }
+
+  async getAlimentosBebidas() {
+    return this.request('/catalogos/alimentos-bebidas');
+  }
+
+  async getEquipoCampo() {
+    return this.request('/catalogos/equipo-campo');
+  }
+
+  async getLimpiezaPersonal() {
+    return this.request('/catalogos/limpieza-personal');
+  }
+
+  async getLimpiezaGeneral() {
+    return this.request('/catalogos/limpieza-general');
+  }
+
+  async getMedicamentos() {
+    return this.request('/catalogos/medicamentos');
+  }
+
+  async getAlimentosAnimales() {
+    return this.request('/catalogos/alimentos-animales');
   }
 
   // Equipamiento
@@ -157,6 +179,114 @@ class ApiService {
     });
   }
 
+  // Equipamiento EPP
+  async getEquipamientoEPPData(brigadaId) {
+    return this.request(`/equipamiento/${brigadaId}/epp`);
+  }
+
+  async createEquipamientoEPPData(brigadaId, eppData) {
+    return this.request(`/equipamiento/${brigadaId}/epp`, {
+      method: 'POST',
+      body: JSON.stringify(eppData),
+    });
+  }
+
+  // Herramientas
+  async getHerramientasData(brigadaId) {
+    return this.request(`/equipamiento/${brigadaId}/herramientas`);
+  }
+
+  async createHerramientasData(brigadaId, herramientasData) {
+    return this.request(`/equipamiento/${brigadaId}/herramientas`, {
+      method: 'POST',
+      body: JSON.stringify(herramientasData),
+    });
+  }
+
+  // Logística Vehículos
+  async getLogisticaVehiculos(brigadaId) {
+    return this.request(`/equipamiento/${brigadaId}/logistica-vehiculos`);
+  }
+
+  async createLogisticaVehiculos(brigadaId, logisticaData) {
+    return this.request(`/equipamiento/${brigadaId}/logistica-vehiculos`, {
+      method: 'POST',
+      body: JSON.stringify(logisticaData),
+    });
+  }
+
+  // Alimentación
+  async getAlimentacionData(brigadaId) {
+    return this.request(`/equipamiento/${brigadaId}/alimentacion`);
+  }
+
+  async createAlimentacionData(brigadaId, alimentacionData) {
+    return this.request(`/equipamiento/${brigadaId}/alimentacion`, {
+      method: 'POST',
+      body: JSON.stringify(alimentacionData),
+    });
+  }
+
+  // Equipo Campo
+  async getEquipoCampoData(brigadaId) {
+    return this.request(`/equipamiento/${brigadaId}/equipo-campo`);
+  }
+
+  async createEquipoCampoData(brigadaId, equipoCampoData) {
+    return this.request(`/equipamiento/${brigadaId}/equipo-campo`, {
+      method: 'POST',
+      body: JSON.stringify(equipoCampoData),
+    });
+  }
+
+  // Limpieza Personal
+  async getLimpiezaPersonalData(brigadaId) {
+    return this.request(`/equipamiento/${brigadaId}/limpieza-personal`);
+  }
+
+  async createLimpiezaPersonalData(brigadaId, limpiezaPersonalData) {
+    return this.request(`/equipamiento/${brigadaId}/limpieza-personal`, {
+      method: 'POST',
+      body: JSON.stringify(limpiezaPersonalData),
+    });
+  }
+
+  // Limpieza General
+  async getLimpiezaGeneralData(brigadaId) {
+    return this.request(`/equipamiento/${brigadaId}/limpieza-general`);
+  }
+
+  async createLimpiezaGeneralData(brigadaId, limpiezaGeneralData) {
+    return this.request(`/equipamiento/${brigadaId}/limpieza-general`, {
+      method: 'POST',
+      body: JSON.stringify(limpiezaGeneralData),
+    });
+  }
+
+  // Medicamentos
+  async getMedicamentosData(brigadaId) {
+    return this.request(`/equipamiento/${brigadaId}/medicamentos`);
+  }
+
+  async createMedicamentosData(brigadaId, medicamentosData) {
+    return this.request(`/equipamiento/${brigadaId}/medicamentos`, {
+      method: 'POST',
+      body: JSON.stringify(medicamentosData),
+    });
+  }
+
+  // Rescate Animal
+  async getRescateAnimalData(brigadaId) {
+    return this.request(`/equipamiento/${brigadaId}/rescate-animal`);
+  }
+
+  async createRescateAnimalData(brigadaId, rescateAnimalData) {
+    return this.request(`/equipamiento/${brigadaId}/rescate-animal`, {
+      method: 'POST',
+      body: JSON.stringify(rescateAnimalData),
+    });
+  }
+
   // Método para obtener formulario completo de una brigada
   async getFormularioCompleto(brigadaId) {
     try {
@@ -184,15 +314,55 @@ class ApiService {
   // Método simplificado para cargar catálogos existentes
   async getAllCatalogos() {
     try {
-      const tiposRopa = await this.getTiposRopa().catch(() => ({ success: false, data: [] }));
+      const [
+        tiposRopa,
+        equipamientoEPP,
+        herramientas,
+        serviciosVehiculos,
+        alimentosBebidas,
+        equipoCampo,
+        limpiezaPersonal,
+        limpiezaGeneral,
+        medicamentos,
+        alimentosAnimales
+      ] = await Promise.all([
+        this.getTiposRopa().catch(() => ({ success: false, data: [] })),
+        this.getEquipamientoEPP().catch(() => ({ success: false, data: [] })),
+        this.getHerramientas().catch(() => ({ success: false, data: [] })),
+        this.getServiciosVehiculos().catch(() => ({ success: false, data: [] })),
+        this.getAlimentosBebidas().catch(() => ({ success: false, data: [] })),
+        this.getEquipoCampo().catch(() => ({ success: false, data: [] })),
+        this.getLimpiezaPersonal().catch(() => ({ success: false, data: [] })),
+        this.getLimpiezaGeneral().catch(() => ({ success: false, data: [] })),
+        this.getMedicamentos().catch(() => ({ success: false, data: [] })),
+        this.getAlimentosAnimales().catch(() => ({ success: false, data: [] }))
+      ]);
       
       return {
-        tipos_ropa: tiposRopa.success ? tiposRopa.data : []
+        tipos_ropa: tiposRopa.success ? tiposRopa.data : (tiposRopa.data || []),
+        equipamiento_epp: equipamientoEPP.success ? equipamientoEPP.data : (equipamientoEPP.data || []),
+        herramientas: herramientas.success ? herramientas.data : (herramientas.data || []),
+        servicios_vehiculos: serviciosVehiculos.success ? serviciosVehiculos.data : (serviciosVehiculos.data || []),
+        alimentos_bebidas: alimentosBebidas.success ? alimentosBebidas.data : (alimentosBebidas.data || []),
+        equipo_campo: equipoCampo.success ? equipoCampo.data : (equipoCampo.data || []),
+        limpieza_personal: limpiezaPersonal.success ? limpiezaPersonal.data : (limpiezaPersonal.data || []),
+        limpieza_general: limpiezaGeneral.success ? limpiezaGeneral.data : (limpiezaGeneral.data || []),
+        medicamentos: medicamentos.success ? medicamentos.data : (medicamentos.data || []),
+        alimentos_animales: alimentosAnimales.success ? alimentosAnimales.data : (alimentosAnimales.data || [])
       };
     } catch (error) {
       console.error('Error cargando catálogos:', error);
       return {
-        tipos_ropa: []
+        tipos_ropa: [],
+        equipamiento_epp: [],
+        herramientas: [],
+        servicios_vehiculos: [],
+        alimentos_bebidas: [],
+        equipo_campo: [],
+        limpieza_personal: [],
+        limpieza_general: [],
+        medicamentos: [],
+        alimentos_animales: []
       };
     }
   }

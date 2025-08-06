@@ -45,27 +45,56 @@ const [mostrarModal, setMostrarModal] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [formData, setFormData] = useState({
     brigada: {
-      nombre: '',
-      descripcion: '',
-      activo: true
+      NombreBrigada: '',
+      CantidadBomberosActivos: '',
+      ContactoCelularComandante: '',
+      EncargadoLogistica: '',
+      ContactoCelularLogistica: '',
+      NumeroEmergenciaPublico: ''
     },
     equipamiento: {
       ropa: [],
       botas: [],
-      guantes: []
+      guantes: [],
+      epp: [],
+      herramientas: [],
+      logistica_vehiculos: [],
+      alimentacion: [],
+      equipo_campo: [],
+      limpieza_personal: [],
+      limpieza_general: [],
+      medicamentos: [],
+      rescate_animal: []
     }
   });
 
   // Catálogos
   const [catalogos, setCatalogos] = useState({
-    tipos_ropa: []
+    tipos_ropa: [],
+    equipamiento_epp: [],
+    herramientas: [],
+    servicios_vehiculos: [],
+    alimentos_bebidas: [],
+    equipo_campo: [],
+    limpieza_personal: [],
+    limpieza_general: [],
+    medicamentos: [],
+    alimentos_animales: []
   });
 
   const steps = [
-    { id: 0, title: 'Información General', icon: FileText, color: 'bg-blue-500' },
-    { id: 1, title: 'Equipamiento de Ropa', icon: Shirt, color: 'bg-green-500' },
-    { id: 2, title: 'Calzado (Botas)', icon: ShieldCheck, color: 'bg-yellow-500' },
-    { id: 3, title: 'Guantes', icon: Wrench, color: 'bg-purple-500' }
+    { id: 0, title: 'Datos de la Brigada', icon: FileText, color: 'bg-blue-500' },
+    { id: 1, title: 'Equipamiento EPP (ROPA)', icon: Shirt, color: 'bg-green-500' },
+    { id: 2, title: 'BOTAS Y GUANTES', icon: ShieldCheck, color: 'bg-yellow-500' },
+    { id: 3, title: 'Equipamiento EPP (ESCLAVA, LINTERNA, etc)', icon: Wrench, color: 'bg-purple-500' },
+    { id: 4, title: 'HERRAMIENTAS (Linternas, pilas, azadón, etc)', icon: Wrench, color: 'bg-orange-500' },
+    { id: 5, title: 'Logística (Gasolina, diesel, amortiguadores)', icon: Car, color: 'bg-red-500' },
+    { id: 6, title: 'Alimentación y bebidas', icon: Coffee, color: 'bg-pink-500' },
+    { id: 7, title: 'Logística y equipo de campo (colchonetas, etc)', icon: Tent, color: 'bg-indigo-500' },
+    { id: 8, title: 'Limpieza personal (shampoo, etc)', icon: Droplets, color: 'bg-cyan-500' },
+    { id: 9, title: 'Limpieza general (ACE, LAVANDINA, etc)', icon: Droplets, color: 'bg-teal-500' },
+    { id: 10, title: 'Medicamentos', icon: Pill, color: 'bg-emerald-500' },
+    { id: 11, title: 'Rescate animal', icon: Heart, color: 'bg-rose-500' }
   ];
 
   // Cargar datos iniciales
@@ -121,47 +150,138 @@ const [mostrarModal, setMostrarModal] = useState(false);
     setCurrentStep(0);
     setFormData({
       brigada: {
-        nombre: '',
-        descripcion: '',
-        activo: true
+        NombreBrigada: '',
+        CantidadBomberosActivos: '',
+        ContactoCelularComandante: '',
+        EncargadoLogistica: '',
+        ContactoCelularLogistica: '',
+        NumeroEmergenciaPublico: ''
       },
       equipamiento: {
         ropa: [],
         botas: [],
-        guantes: []
+        guantes: [],
+        epp: [],
+        herramientas: [],
+        logistica_vehiculos: [],
+        alimentacion: [],
+        equipo_campo: [],
+        limpieza_personal: [],
+        limpieza_general: [],
+        medicamentos: [],
+        rescate_animal: []
       }
     });
+    setSelectedBrigada(null);
     setCurrentView('form');
   };
 
-  // ✅ FUNCIÓN CORREGIDA - Crear brigada
+  // ✅ FUNCIÓN CORREGIDA - Crear brigada y equipamiento
   const handleSubmitForm = async () => {
     try {
       setLoading(true);
       setError(null);
       
       const brigadaData = {
-        nombre: formData.brigada.nombre,
-        descripcion: formData.brigada.descripcion,
-        activo: formData.brigada.activo
+        NombreBrigada: formData.brigada.NombreBrigada,
+        CantidadBomberosActivos: parseInt(formData.brigada.CantidadBomberosActivos) || 0,
+        ContactoCelularComandante: formData.brigada.ContactoCelularComandante,
+        EncargadoLogistica: formData.brigada.EncargadoLogistica,
+        ContactoCelularLogistica: formData.brigada.ContactoCelularLogistica,
+        NumeroEmergenciaPublico: formData.brigada.NumeroEmergenciaPublico
       };
 
       console.log('💾 Guardando brigada:', brigadaData);
-      const response = await apiService.createBrigada(brigadaData);
-      console.log('✅ Brigada guardada:', response);
-      
-      // Tu API puede devolver diferentes estructuras
-      if (response) {
-        setShowSuccessAnimation(true);
-        setTimeout(() => {
-          setShowSuccessAnimation(false);
-          setCurrentView('board');
-          loadBrigadas(); // Recargar la lista
-        }, 2000);
+      let brigadaResponse;
+      let brigadaId;
+
+      if (selectedBrigada) {
+        brigadaResponse = await apiService.updateBrigada(selectedBrigada.id, brigadaData);
+        brigadaId = selectedBrigada.id;
+      } else {
+        brigadaResponse = await apiService.createBrigada(brigadaData);
+        brigadaId = brigadaResponse.data?.id;
       }
+
+      console.log('✅ Brigada guardada:', brigadaResponse);
+
+      // Guardar equipamiento si existe brigadaId
+      if (brigadaId) {
+        console.log('💾 Guardando equipamiento para brigada:', brigadaId);
+        
+        // Guardar ropa
+        for (const ropa of formData.equipamiento.ropa) {
+          await apiService.createEquipamientoRopa(brigadaId, ropa);
+        }
+
+        // Guardar botas
+        for (const botas of formData.equipamiento.botas) {
+          await apiService.createEquipamientoBotas(brigadaId, botas);
+        }
+
+        // Guardar guantes
+        for (const guantes of formData.equipamiento.guantes) {
+          await apiService.createEquipamientoGuantes(brigadaId, guantes);
+        }
+
+        // Guardar EPP
+        for (const epp of formData.equipamiento.epp) {
+          await apiService.createEquipamientoEPPData(brigadaId, epp);
+        }
+
+        // Guardar herramientas
+        for (const herramienta of formData.equipamiento.herramientas) {
+          await apiService.createHerramientasData(brigadaId, herramienta);
+        }
+
+        // Guardar logística vehículos
+        for (const logistica of formData.equipamiento.logistica_vehiculos) {
+          await apiService.createLogisticaVehiculos(brigadaId, logistica);
+        }
+
+        // Guardar alimentación
+        for (const alimentacion of formData.equipamiento.alimentacion) {
+          await apiService.createAlimentacionData(brigadaId, alimentacion);
+        }
+
+        // Guardar equipo campo
+        for (const equipoCampo of formData.equipamiento.equipo_campo) {
+          await apiService.createEquipoCampoData(brigadaId, equipoCampo);
+        }
+
+        // Guardar limpieza personal
+        for (const limpiezaPersonal of formData.equipamiento.limpieza_personal) {
+          await apiService.createLimpiezaPersonalData(brigadaId, limpiezaPersonal);
+        }
+
+        // Guardar limpieza general
+        for (const limpiezaGeneral of formData.equipamiento.limpieza_general) {
+          await apiService.createLimpiezaGeneralData(brigadaId, limpiezaGeneral);
+        }
+
+        // Guardar medicamentos
+        for (const medicamento of formData.equipamiento.medicamentos) {
+          await apiService.createMedicamentosData(brigadaId, medicamento);
+        }
+
+        // Guardar rescate animal
+        for (const rescateAnimal of formData.equipamiento.rescate_animal) {
+          await apiService.createRescateAnimalData(brigadaId, rescateAnimal);
+        }
+
+        console.log('✅ Todo el equipamiento guardado exitosamente');
+      }
+      
+      setShowSuccessAnimation(true);
+      setTimeout(() => {
+        setShowSuccessAnimation(false);
+        setCurrentView('board');
+        loadBrigadas(); // Recargar la lista
+      }, 2000);
+
     } catch (error) {
       console.error('❌ Error submitting form:', error);
-      setError(`Error al guardar la brigada: ${error.message}`);
+      setError(`Error al guardar el formulario: ${error.message}`);
     } finally {
       setLoading(false);
     }
@@ -195,14 +315,26 @@ const [mostrarModal, setMostrarModal] = useState(false);
     setSelectedBrigada(brigada);
     setFormData({
       brigada: {
-        nombre: brigada.nombre,
-        descripcion: brigada.descripcion || '',
-        activo: brigada.activo !== undefined ? brigada.activo : true
+        NombreBrigada: brigada.nombre_brigada || '',
+        CantidadBomberosActivos: brigada.cantidad_bomberos_activos || '',
+        ContactoCelularComandante: brigada.contacto_celular_comandante || '',
+        EncargadoLogistica: brigada.encargado_logistica || '',
+        ContactoCelularLogistica: brigada.contacto_celular_logistica || '',
+        NumeroEmergenciaPublico: brigada.numero_emergencia_publico || ''
       },
       equipamiento: {
         ropa: [],
         botas: [],
-        guantes: []
+        guantes: [],
+        epp: [],
+        herramientas: [],
+        logistica_vehiculos: [],
+        alimentacion: [],
+        equipo_campo: [],
+        limpieza_personal: [],
+        limpieza_general: [],
+        medicamentos: [],
+        rescate_animal: []
       }
     });
     setCurrentStep(0);
@@ -507,8 +639,8 @@ const [mostrarModal, setMostrarModal] = useState(false);
   const InformacionGeneralStep = () => (
     <div className="form-step">
       <div className="step-header">
-        <h2>{selectedBrigada ? 'Editar Brigada' : 'Información General de la Brigada'}</h2>
-        <p>Proporciona los datos básicos de la brigada de bomberos</p>
+        <h2>{selectedBrigada ? 'Editar Brigada' : 'Datos de la Brigada'}</h2>
+        <p>Proporciona los datos básicos de la brigada de bomberos forestales</p>
       </div>
       
       <div className="form-grid">
@@ -517,37 +649,483 @@ const [mostrarModal, setMostrarModal] = useState(false);
           <input
             type="text"
             className="form-input"
-            value={formData.brigada.nombre}
-            onChange={(e) => updateFormData('brigada', 'nombre', e.target.value)}
+            value={formData.brigada.NombreBrigada}
+            onChange={(e) => updateFormData('brigada', 'NombreBrigada', e.target.value)}
             placeholder="Ej: Brigada Forestal Central"
             required
           />
         </div>
         
         <div className="form-group">
-          <label>Descripción</label>
-          <textarea
-            className="form-textarea"
-            value={formData.brigada.descripcion}
-            onChange={(e) => updateFormData('brigada', 'descripcion', e.target.value)}
-            placeholder="Descripción de la brigada"
-            rows="3"
+          <label>Cantidad de Bomberos Activos</label>
+          <input
+            type="number"
+            className="form-input"
+            value={formData.brigada.CantidadBomberosActivos}
+            onChange={(e) => updateFormData('brigada', 'CantidadBomberosActivos', e.target.value)}
+            placeholder="Ej: 25"
+            min="0"
           />
         </div>
         
         <div className="form-group">
-          <label>
-            <input
-              type="checkbox"
-              checked={formData.brigada.activo}
-              onChange={(e) => updateFormData('brigada', 'activo', e.target.checked)}
-            />
-            Brigada Activa
-          </label>
+          <label>Contacto Celular del Comandante</label>
+          <input
+            type="tel"
+            className="form-input"
+            value={formData.brigada.ContactoCelularComandante}
+            onChange={(e) => updateFormData('brigada', 'ContactoCelularComandante', e.target.value)}
+            placeholder="Ej: +56912345678"
+            maxLength="20"
+          />
+        </div>
+        
+        <div className="form-group">
+          <label>Encargado de Logística</label>
+          <input
+            type="text"
+            className="form-input"
+            value={formData.brigada.EncargadoLogistica}
+            onChange={(e) => updateFormData('brigada', 'EncargadoLogistica', e.target.value)}
+            placeholder="Nombre del encargado de logística"
+            maxLength="255"
+          />
+        </div>
+        
+        <div className="form-group">
+          <label>Contacto Celular de Logística</label>
+          <input
+            type="tel"
+            className="form-input"
+            value={formData.brigada.ContactoCelularLogistica}
+            onChange={(e) => updateFormData('brigada', 'ContactoCelularLogistica', e.target.value)}
+            placeholder="Ej: +56987654321"
+            maxLength="20"
+          />
+        </div>
+        
+        <div className="form-group">
+          <label>Número de Emergencia Público</label>
+          <input
+            type="tel"
+            className="form-input"
+            value={formData.brigada.NumeroEmergenciaPublico}
+            onChange={(e) => updateFormData('brigada', 'NumeroEmergenciaPublico', e.target.value)}
+            placeholder="Ej: 132"
+            maxLength="20"
+          />
         </div>
       </div>
     </div>
   );
+
+  // Componente de Step 1 - Equipamiento EPP (ROPA)
+  const EquipamientoRopaStep = () => {
+    const [selectedTipoRopa, setSelectedTipoRopa] = useState('');
+    const [ropaCantidades, setRopaCantidades] = useState({
+      CantidadXS: 0,
+      CantidadS: 0,
+      CantidadM: 0,
+      CantidadL: 0,
+      CantidadXL: 0,
+      Observaciones: ''
+    });
+
+    const agregarRopa = () => {
+      if (!selectedTipoRopa) return;
+      
+      const nuevaRopa = {
+        TipoRopaID: parseInt(selectedTipoRopa),
+        ...ropaCantidades
+      };
+      
+      const nuevasRopas = [...formData.equipamiento.ropa, nuevaRopa];
+      updateFormData('equipamiento', 'ropa', nuevasRopas);
+      
+      // Reset form
+      setSelectedTipoRopa('');
+      setRopaCantidades({
+        CantidadXS: 0,
+        CantidadS: 0,
+        CantidadM: 0,
+        CantidadL: 0,
+        CantidadXL: 0,
+        Observaciones: ''
+      });
+    };
+
+    return (
+      <div className="form-step">
+        <div className="step-header">
+          <h2>Equipamiento EPP (ROPA)</h2>
+          <p>Registra el equipamiento de ropa por tallas</p>
+        </div>
+        
+        <div className="form-grid">
+          <div className="form-group">
+            <label>Tipo de Ropa *</label>
+            <select
+              className="form-select"
+              value={selectedTipoRopa}
+              onChange={(e) => setSelectedTipoRopa(e.target.value)}
+            >
+              <option value="">Seleccionar tipo de ropa</option>
+              {catalogos.tipos_ropa.map((tipo) => (
+                <option key={tipo.id} value={tipo.id}>
+                  {tipo.nombre}
+                </option>
+              ))}
+            </select>
+          </div>
+          
+          <div className="form-row">
+            <div className="form-group">
+              <label>Cantidad XS</label>
+              <input
+                type="number"
+                className="form-input"
+                value={ropaCantidades.CantidadXS}
+                onChange={(e) => setRopaCantidades({...ropaCantidades, CantidadXS: parseInt(e.target.value) || 0})}
+                min="0"
+              />
+            </div>
+            <div className="form-group">
+              <label>Cantidad S</label>
+              <input
+                type="number"
+                className="form-input"
+                value={ropaCantidades.CantidadS}
+                onChange={(e) => setRopaCantidades({...ropaCantidades, CantidadS: parseInt(e.target.value) || 0})}
+                min="0"
+              />
+            </div>
+            <div className="form-group">
+              <label>Cantidad M</label>
+              <input
+                type="number"
+                className="form-input"
+                value={ropaCantidades.CantidadM}
+                onChange={(e) => setRopaCantidades({...ropaCantidades, CantidadM: parseInt(e.target.value) || 0})}
+                min="0"
+              />
+            </div>
+            <div className="form-group">
+              <label>Cantidad L</label>
+              <input
+                type="number"
+                className="form-input"
+                value={ropaCantidades.CantidadL}
+                onChange={(e) => setRopaCantidades({...ropaCantidades, CantidadL: parseInt(e.target.value) || 0})}
+                min="0"
+              />
+            </div>
+            <div className="form-group">
+              <label>Cantidad XL</label>
+              <input
+                type="number"
+                className="form-input"
+                value={ropaCantidades.CantidadXL}
+                onChange={(e) => setRopaCantidades({...ropaCantidades, CantidadXL: parseInt(e.target.value) || 0})}
+                min="0"
+              />
+            </div>
+          </div>
+          
+          <div className="form-group">
+            <label>Observaciones</label>
+            <textarea
+              className="form-textarea"
+              value={ropaCantidades.Observaciones}
+              onChange={(e) => setRopaCantidades({...ropaCantidades, Observaciones: e.target.value})}
+              placeholder="Observaciones adicionales"
+              rows="2"
+            />
+          </div>
+          
+          <button type="button" className="add-button" onClick={agregarRopa} disabled={!selectedTipoRopa}>
+            <Plus size={16} />
+            Agregar Ropa
+          </button>
+        </div>
+        
+        {formData.equipamiento.ropa.length > 0 && (
+          <div className="items-list">
+            <h3>Ropa Agregada:</h3>
+            {formData.equipamiento.ropa.map((item, index) => (
+              <div key={index} className="item-card">
+                <p><strong>Tipo:</strong> {catalogos.tipos_ropa.find(t => t.id === item.TipoRopaID)?.nombre || 'N/A'}</p>
+                <p><strong>Cantidades:</strong> XS: {item.CantidadXS}, S: {item.CantidadS}, M: {item.CantidadM}, L: {item.CantidadL}, XL: {item.CantidadXL}</p>
+                {item.Observaciones && <p><strong>Observaciones:</strong> {item.Observaciones}</p>}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // Componente de Step 2 - BOTAS Y GUANTES
+  const BotasGuantesStep = () => {
+    const [botasCantidades, setBotasCantidades] = useState({
+      Talla37: 0, Talla38: 0, Talla39: 0, Talla40: 0, Talla41: 0, Talla42: 0, Talla43: 0,
+      OtraTalla: '', CantidadOtraTalla: 0, Observaciones: ''
+    });
+    
+    const [guantesCantidades, setGuantesCantidades] = useState({
+      TallaXS: 0, TallaS: 0, TallaM: 0, TallaL: 0, TallaXL: 0, TallaXXL: 0,
+      OtraTalla: '', CantidadOtraTalla: 0, Observaciones: ''
+    });
+
+    const agregarBotas = () => {
+      const nuevasBotas = [...formData.equipamiento.botas, botasCantidades];
+      updateFormData('equipamiento', 'botas', nuevasBotas);
+      setBotasCantidades({
+        Talla37: 0, Talla38: 0, Talla39: 0, Talla40: 0, Talla41: 0, Talla42: 0, Talla43: 0,
+        OtraTalla: '', CantidadOtraTalla: 0, Observaciones: ''
+      });
+    };
+
+    const agregarGuantes = () => {
+      const nuevosGuantes = [...formData.equipamiento.guantes, guantesCantidades];
+      updateFormData('equipamiento', 'guantes', nuevosGuantes);
+      setGuantesCantidades({
+        TallaXS: 0, TallaS: 0, TallaM: 0, TallaL: 0, TallaXL: 0, TallaXXL: 0,
+        OtraTalla: '', CantidadOtraTalla: 0, Observaciones: ''
+      });
+    };
+
+    return (
+      <div className="form-step">
+        <div className="step-header">
+          <h2>BOTAS Y GUANTES</h2>
+          <p>Registra las cantidades de botas y guantes por tallas</p>
+        </div>
+        
+        {/* Sección Botas */}
+        <div className="section">
+          <h3>Botas</h3>
+          <div className="form-row">
+            {['37', '38', '39', '40', '41', '42', '43'].map(talla => (
+              <div key={talla} className="form-group">
+                <label>Talla {talla}</label>
+                <input
+                  type="number"
+                  className="form-input"
+                  value={botasCantidades[`Talla${talla}`]}
+                  onChange={(e) => setBotasCantidades({...botasCantidades, [`Talla${talla}`]: parseInt(e.target.value) || 0})}
+                  min="0"
+                />
+              </div>
+            ))}
+          </div>
+          <div className="form-row">
+            <div className="form-group">
+              <label>Otra Talla</label>
+              <input
+                type="text"
+                className="form-input"
+                value={botasCantidades.OtraTalla}
+                onChange={(e) => setBotasCantidades({...botasCantidades, OtraTalla: e.target.value})}
+                placeholder="Especificar talla"
+              />
+            </div>
+            <div className="form-group">
+              <label>Cantidad Otra Talla</label>
+              <input
+                type="number"
+                className="form-input"
+                value={botasCantidades.CantidadOtraTalla}
+                onChange={(e) => setBotasCantidades({...botasCantidades, CantidadOtraTalla: parseInt(e.target.value) || 0})}
+                min="0"
+              />
+            </div>
+          </div>
+          <div className="form-group">
+            <label>Observaciones Botas</label>
+            <textarea
+              className="form-textarea"
+              value={botasCantidades.Observaciones}
+              onChange={(e) => setBotasCantidades({...botasCantidades, Observaciones: e.target.value})}
+              placeholder="Observaciones adicionales"
+              rows="2"
+            />
+          </div>
+          <button type="button" className="add-button" onClick={agregarBotas}>
+            <Plus size={16} />
+            Agregar Botas
+          </button>
+        </div>
+
+        {/* Sección Guantes */}
+        <div className="section">
+          <h3>Guantes</h3>
+          <div className="form-row">
+            {['XS', 'S', 'M', 'L', 'XL', 'XXL'].map(talla => (
+              <div key={talla} className="form-group">
+                <label>Talla {talla}</label>
+                <input
+                  type="number"
+                  className="form-input"
+                  value={guantesCantidades[`Talla${talla}`]}
+                  onChange={(e) => setGuantesCantidades({...guantesCantidades, [`Talla${talla}`]: parseInt(e.target.value) || 0})}
+                  min="0"
+                />
+              </div>
+            ))}
+          </div>
+          <div className="form-row">
+            <div className="form-group">
+              <label>Otra Talla</label>
+              <input
+                type="text"
+                className="form-input"
+                value={guantesCantidades.OtraTalla}
+                onChange={(e) => setGuantesCantidades({...guantesCantidades, OtraTalla: e.target.value})}
+                placeholder="Especificar talla"
+              />
+            </div>
+            <div className="form-group">
+              <label>Cantidad Otra Talla</label>
+              <input
+                type="number"
+                className="form-input"
+                value={guantesCantidades.CantidadOtraTalla}
+                onChange={(e) => setGuantesCantidades({...guantesCantidades, CantidadOtraTalla: parseInt(e.target.value) || 0})}
+                min="0"
+              />
+            </div>
+          </div>
+          <div className="form-group">
+            <label>Observaciones Guantes</label>
+            <textarea
+              className="form-textarea"
+              value={guantesCantidades.Observaciones}
+              onChange={(e) => setGuantesCantidades({...guantesCantidades, Observaciones: e.target.value})}
+              placeholder="Observaciones adicionales"
+              rows="2"
+            />
+          </div>
+          <button type="button" className="add-button" onClick={agregarGuantes}>
+            <Plus size={16} />
+            Agregar Guantes
+          </button>
+        </div>
+      </div>
+    );
+  };
+
+  // Componente genérico para equipamiento con catálogo
+  const EquipamientoGenericoStep = ({ title, description, catalogKey, equipamientoKey, idField, showMonto = false }) => {
+    const [selectedItem, setSelectedItem] = useState('');
+    const [cantidad, setCantidad] = useState(0);
+    const [monto, setMonto] = useState(0);
+    const [observaciones, setObservaciones] = useState('');
+
+    const catalogo = catalogos[catalogKey] || [];
+    const equipamientoItems = formData.equipamiento[equipamientoKey] || [];
+
+    const agregarItem = () => {
+      if (!selectedItem) return;
+      
+      const nuevoItem = {
+        [idField]: parseInt(selectedItem),
+        Cantidad: cantidad,
+        ...(showMonto && { MontoAproximado: monto }),
+        Observaciones: observaciones
+      };
+      
+      const nuevosItems = [...equipamientoItems, nuevoItem];
+      updateFormData('equipamiento', equipamientoKey, nuevosItems);
+      
+      // Reset form
+      setSelectedItem('');
+      setCantidad(0);
+      setMonto(0);
+      setObservaciones('');
+    };
+
+    return (
+      <div className="form-step">
+        <div className="step-header">
+          <h2>{title}</h2>
+          <p>{description}</p>
+        </div>
+        
+        <div className="form-grid">
+          <div className="form-group">
+            <label>Seleccionar Item *</label>
+            <select
+              className="form-select"
+              value={selectedItem}
+              onChange={(e) => setSelectedItem(e.target.value)}
+            >
+              <option value="">Seleccionar...</option>
+              {catalogo.map((item) => (
+                <option key={item.id} value={item.id}>
+                  {item.nombre}
+                </option>
+              ))}
+            </select>
+          </div>
+          
+          <div className="form-group">
+            <label>Cantidad</label>
+            <input
+              type="number"
+              className="form-input"
+              value={cantidad}
+              onChange={(e) => setCantidad(parseInt(e.target.value) || 0)}
+              min="0"
+            />
+          </div>
+          
+          {showMonto && (
+            <div className="form-group">
+              <label>Monto Aproximado</label>
+              <input
+                type="number"
+                step="0.01"
+                className="form-input"
+                value={monto}
+                onChange={(e) => setMonto(parseFloat(e.target.value) || 0)}
+                min="0"
+              />
+            </div>
+          )}
+          
+          <div className="form-group">
+            <label>Observaciones</label>
+            <textarea
+              className="form-textarea"
+              value={observaciones}
+              onChange={(e) => setObservaciones(e.target.value)}
+              placeholder="Observaciones adicionales"
+              rows="2"
+            />
+          </div>
+          
+          <button type="button" className="add-button" onClick={agregarItem} disabled={!selectedItem}>
+            <Plus size={16} />
+            Agregar Item
+          </button>
+        </div>
+        
+        {equipamientoItems.length > 0 && (
+          <div className="items-list">
+            <h3>Items Agregados:</h3>
+            {equipamientoItems.map((item, index) => (
+              <div key={index} className="item-card">
+                <p><strong>Item:</strong> {catalogo.find(c => c.id === item[idField])?.nombre || 'N/A'}</p>
+                <p><strong>Cantidad:</strong> {item.Cantidad}</p>
+                {showMonto && <p><strong>Monto:</strong> ${item.MontoAproximado}</p>}
+                {item.Observaciones && <p><strong>Observaciones:</strong> {item.Observaciones}</p>}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  };
 
   // Componente de Form View
 
@@ -558,23 +1136,89 @@ const [mostrarModal, setMostrarModal] = useState(false);
       
       <div className="form-content">
         {currentStep === 0 && <InformacionGeneralStep />}
-        {currentStep === 1 && (
-          <div className="form-step">
-            <h2>Equipamiento de Ropa</h2>
-            <p>Próximamente...</p>
-          </div>
-        )}
-        {currentStep === 2 && (
-          <div className="form-step">
-            <h2>Equipamiento de Botas</h2>
-            <p>Próximamente...</p>
-          </div>
-        )}
+        {currentStep === 1 && <EquipamientoRopaStep />}
+        {currentStep === 2 && <BotasGuantesStep />}
         {currentStep === 3 && (
-          <div className="form-step">
-            <h2>Equipamiento de Guantes</h2>
-            <p>Próximamente...</p>
-          </div>
+          <EquipamientoGenericoStep 
+            title="Equipamiento EPP (ESCLAVA, LINTERNA, etc)"
+            description="Registra equipamiento de protección personal adicional"
+            catalogKey="equipamiento_epp"
+            equipamientoKey="epp"
+            idField="EquipoEPPID"
+          />
+        )}
+        {currentStep === 4 && (
+          <EquipamientoGenericoStep 
+            title="HERRAMIENTAS (Linternas, pilas, azadón, etc)"
+            description="Registra herramientas para operaciones forestales"
+            catalogKey="herramientas"
+            equipamientoKey="herramientas"
+            idField="HerramientaID"
+          />
+        )}
+        {currentStep === 5 && (
+          <EquipamientoGenericoStep 
+            title="Logística (Gasolina, diesel, amortiguadores)"
+            description="Registra servicios y gastos de vehículos"
+            catalogKey="servicios_vehiculos"
+            equipamientoKey="logistica_vehiculos"
+            idField="ServicioVehiculoID"
+            showMonto={true}
+          />
+        )}
+        {currentStep === 6 && (
+          <EquipamientoGenericoStep 
+            title="Alimentación y bebidas"
+            description="Registra alimentos y bebidas para las operaciones"
+            catalogKey="alimentos_bebidas"
+            equipamientoKey="alimentacion"
+            idField="AlimentoBebidaID"
+          />
+        )}
+        {currentStep === 7 && (
+          <EquipamientoGenericoStep 
+            title="Logística y equipo de campo (colchonetas, etc)"
+            description="Registra equipamiento para operaciones en campo"
+            catalogKey="equipo_campo"
+            equipamientoKey="equipo_campo"
+            idField="EquipoCampoID"
+          />
+        )}
+        {currentStep === 8 && (
+          <EquipamientoGenericoStep 
+            title="Limpieza personal (shampoo, etc)"
+            description="Registra productos de higiene personal"
+            catalogKey="limpieza_personal"
+            equipamientoKey="limpieza_personal"
+            idField="ProductoLimpiezaPersonalID"
+          />
+        )}
+        {currentStep === 9 && (
+          <EquipamientoGenericoStep 
+            title="Limpieza general (ACE, LAVANDINA, etc)"
+            description="Registra productos de limpieza general"
+            catalogKey="limpieza_general"
+            equipamientoKey="limpieza_general"
+            idField="ProductoLimpiezaGeneralID"
+          />
+        )}
+        {currentStep === 10 && (
+          <EquipamientoGenericoStep 
+            title="Medicamentos"
+            description="Registra medicamentos y suministros médicos"
+            catalogKey="medicamentos"
+            equipamientoKey="medicamentos"
+            idField="MedicamentoID"
+          />
+        )}
+        {currentStep === 11 && (
+          <EquipamientoGenericoStep 
+            title="Rescate animal"
+            description="Registra alimentos para rescate de animales"
+            catalogKey="alimentos_animales"
+            equipamientoKey="rescate_animal"
+            idField="AlimentoAnimalID"
+          />
         )}
       </div>
       
@@ -600,7 +1244,7 @@ const [mostrarModal, setMostrarModal] = useState(false);
           <button 
             className="nav-btn primary" 
             onClick={nextStep}
-            disabled={currentStep === 0 && !formData.brigada.nombre}
+            disabled={currentStep === 0 && !formData.brigada.NombreBrigada}
           >
             Siguiente
             <ChevronRight size={20} />
@@ -609,7 +1253,7 @@ const [mostrarModal, setMostrarModal] = useState(false);
           <button 
             className="nav-btn success" 
             onClick={handleSubmitForm}
-            disabled={loading || !formData.brigada.nombre}
+            disabled={loading || !formData.brigada.NombreBrigada}
           >
             <Save size={20} />
             {loading ? 'Guardando...' : (selectedBrigada ? 'Actualizar' : 'Guardar Formulario')}

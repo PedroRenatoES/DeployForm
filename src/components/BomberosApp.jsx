@@ -23,10 +23,8 @@ import {
   Eye,
   FileText
 } from 'lucide-react';
-import './BomberosApp.css';
-
-// Configuración de la API
-const API_BASE_URL = 'http://localhost:3000/api';
+import '../components/BomberosApp.css';
+import apiService from '../../services/api'; 
 
 // Componente principal
 const BomberosApp = () => {
@@ -36,60 +34,34 @@ const BomberosApp = () => {
   const [selectedBrigada, setSelectedBrigada] = useState(null);
   const [modalType, setModalType] = useState('create');
   const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   // Estados para el formulario
   const [currentStep, setCurrentStep] = useState(0);
   const [formData, setFormData] = useState({
     brigada: {
-      nombre_brigada: '',
-      cantidad_bomberos_activos: 0,
-      contacto_celular_comandante: '',
-      encargado_logistica: '',
-      contacto_celular_logistica: '',
-      numero_emergencia_publico: ''
+      nombre: '',
+      descripcion: '',
+      activo: true
     },
     equipamiento: {
       ropa: [],
-      botas: {},
-      guantes: {},
-      epp: [],
-      herramientas: [],
-      vehiculos: [],
-      alimentacion: [],
-      equipo_campo: [],
-      limpieza_personal: [],
-      limpieza_general: [],
-      medicamentos: [],
-      rescate_animal: []
+      botas: [],
+      guantes: []
     }
   });
 
   // Catálogos
   const [catalogos, setCatalogos] = useState({
-    tipos_ropa: [],
-    equipamiento_epp: [],
-    herramientas: [],
-    servicios_vehiculos: [],
-    alimentos_bebidas: [],
-    equipo_campo: [],
-    limpieza_personal: [],
-    limpieza_general: [],
-    medicamentos: [],
-    alimentos_animales: []
+    tipos_ropa: []
   });
 
   const steps = [
     { id: 0, title: 'Información General', icon: FileText, color: 'bg-blue-500' },
     { id: 1, title: 'Equipamiento de Ropa', icon: Shirt, color: 'bg-green-500' },
-    { id: 2, title: 'Equipamiento EPP', icon: ShieldCheck, color: 'bg-yellow-500' },
-    { id: 3, title: 'Herramientas', icon: Wrench, color: 'bg-purple-500' },
-    { id: 4, title: 'Logística Vehículos', icon: Car, color: 'bg-red-500' },
-    { id: 5, title: 'Alimentación', icon: Coffee, color: 'bg-orange-500' },
-    { id: 6, title: 'Equipo de Campo', icon: Tent, color: 'bg-indigo-500' },
-    { id: 7, title: 'Limpieza Personal', icon: Droplets, color: 'bg-pink-500' },
-    { id: 8, title: 'Limpieza General', icon: Droplets, color: 'bg-cyan-500' },
-    { id: 9, title: 'Medicamentos', icon: Pill, color: 'bg-emerald-500' },
-    { id: 10, title: 'Rescate Animal', icon: Heart, color: 'bg-rose-500' }
+    { id: 2, title: 'Calzado (Botas)', icon: ShieldCheck, color: 'bg-yellow-500' },
+    { id: 3, title: 'Guantes', icon: Wrench, color: 'bg-purple-500' }
   ];
 
   // Cargar datos iniciales
@@ -100,44 +72,24 @@ const BomberosApp = () => {
 
   const loadBrigadas = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/brigadas`);
-      const data = await response.json();
-      if (data.success) {
-        setBrigadas(data.data);
+      setLoading(true);
+      setError(null);
+      const response = await apiService.getBrigadas();
+      if (response.success) {
+        setBrigadas(response.data);
       }
     } catch (error) {
       console.error('Error loading brigadas:', error);
+      setError('Error al cargar las brigadas');
+    } finally {
+      setLoading(false);
     }
   };
 
   const loadCatalogos = async () => {
     try {
-      const endpoints = [
-        'tipos-ropa',
-        'equipamiento-epp',
-        'herramientas',
-        'servicios-vehiculos',
-        'alimentos-bebidas',
-        'equipo-campo',
-        'limpieza-personal',
-        'limpieza-general',
-        'medicamentos',
-        'alimentos-animales'
-      ];
-
-      const promises = endpoints.map(endpoint =>
-        fetch(`${API_BASE_URL}/catalogos/${endpoint}`).then(res => res.json())
-      );
-
-      const results = await Promise.all(promises);
-      const newCatalogos = {};
-
-      endpoints.forEach((endpoint, index) => {
-        const key = endpoint.replace('-', '_');
-        newCatalogos[key] = results[index].success ? results[index].data : [];
-      });
-
-      setCatalogos(newCatalogos);
+      const catalogos = await apiService.getAllCatalogos();
+      setCatalogos(catalogos);
     } catch (error) {
       console.error('Error loading catalogos:', error);
     }
@@ -147,26 +99,14 @@ const BomberosApp = () => {
     setCurrentStep(0);
     setFormData({
       brigada: {
-        nombre_brigada: '',
-        cantidad_bomberos_activos: 0,
-        contacto_celular_comandante: '',
-        encargado_logistica: '',
-        contacto_celular_logistica: '',
-        numero_emergencia_publico: ''
+        nombre: '',
+        descripcion: '',
+        activo: true
       },
       equipamiento: {
         ropa: [],
-        botas: {},
-        guantes: {},
-        epp: [],
-        herramientas: [],
-        vehiculos: [],
-        alimentacion: [],
-        equipo_campo: [],
-        limpieza_personal: [],
-        limpieza_general: [],
-        medicamentos: [],
-        rescate_animal: []
+        botas: [],
+        guantes: []
       }
     });
     setCurrentView('form');
@@ -174,25 +114,18 @@ const BomberosApp = () => {
 
   const handleSubmitForm = async () => {
     try {
-      // Crear brigada primero
-      const brigadaResponse = await fetch(`${API_BASE_URL}/brigadas`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          NombreBrigada: formData.brigada.nombre_brigada,
-          CantidadBomberosActivos: formData.brigada.cantidad_bomberos_activos,
-          ContactoCelularComandante: formData.brigada.contacto_celular_comandante,
-          EncargadoLogistica: formData.brigada.encargado_logistica,
-          ContactoCelularLogistica: formData.brigada.contacto_celular_logistica,
-          NumeroEmergenciaPublico: formData.brigada.numero_emergencia_publico
-        }),
-      });
-
-      const brigadaData = await brigadaResponse.json();
+      setLoading(true);
       
-      if (brigadaData.success) {
+      // Crear brigada primero
+      const brigadaData = {
+        nombre: formData.brigada.nombre,
+        descripcion: formData.brigada.descripcion,
+        activo: formData.brigada.activo
+      };
+
+      const response = await apiService.createBrigada(brigadaData);
+      
+      if (response.success) {
         setShowSuccessAnimation(true);
         setTimeout(() => {
           setShowSuccessAnimation(false);
@@ -202,20 +135,23 @@ const BomberosApp = () => {
       }
     } catch (error) {
       console.error('Error submitting form:', error);
+      setError('Error al guardar la brigada');
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleDeleteBrigada = async (id) => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/brigadas/${id}`, {
-        method: 'DELETE',
-      });
-      
-      if (response.ok) {
-        loadBrigadas();
+    if (window.confirm('¿Estás seguro de que deseas eliminar esta brigada?')) {
+      try {
+        const response = await apiService.deleteBrigada(id);
+        if (response.success) {
+          loadBrigadas();
+        }
+      } catch (error) {
+        console.error('Error deleting brigada:', error);
+        setError('Error al eliminar la brigada');
       }
-    } catch (error) {
-      console.error('Error deleting brigada:', error);
     }
   };
 
@@ -237,26 +173,6 @@ const BomberosApp = () => {
       [section]: {
         ...prev[section],
         [field]: value
-      }
-    }));
-  };
-
-  const addEquipamientoItem = (section, item) => {
-    setFormData(prev => ({
-      ...prev,
-      equipamiento: {
-        ...prev.equipamiento,
-        [section]: [...prev.equipamiento[section], item]
-      }
-    }));
-  };
-
-  const removeEquipamientoItem = (section, index) => {
-    setFormData(prev => ({
-      ...prev,
-      equipamiento: {
-        ...prev.equipamiento,
-        [section]: prev.equipamiento[section].filter((_, i) => i !== index)
       }
     }));
   };
@@ -366,11 +282,14 @@ const BomberosApp = () => {
         </button>
       </div>
       
+      {loading && <p>Cargando brigadas...</p>}
+      {error && <p className="error-message">{error}</p>}
+      
       <div className="cards-grid">
         {brigadas.map((brigada) => (
           <div key={brigada.id} className="brigada-card">
             <div className="card-header">
-              <h3>{brigada.nombre_brigada}</h3>
+              <h3>{brigada.nombre}</h3>
               <div className="card-actions">
                 <button className="action-btn view" title="Ver detalles">
                   <Eye size={16} />
@@ -390,28 +309,21 @@ const BomberosApp = () => {
             
             <div className="card-content">
               <div className="info-row">
-                <span className="label">Bomberos Activos:</span>
-                <span className="value">{brigada.cantidad_bomberos_activos}</span>
+                <span className="label">Descripción:</span>
+                <span className="value">{brigada.descripcion || 'Sin descripción'}</span>
               </div>
               <div className="info-row">
-                <span className="label">Comandante:</span>
-                <span className="value">{brigada.contacto_celular_comandante}</span>
-              </div>
-              <div className="info-row">
-                <span className="label">Logística:</span>
-                <span className="value">{brigada.encargado_logistica}</span>
-              </div>
-              <div className="info-row">
-                <span className="label">Emergencia:</span>
-                <span className="value">{brigada.numero_emergencia_publico}</span>
+                <span className="label">Estado:</span>
+                <span className={`status ${brigada.activo ? 'active' : 'inactive'}`}>
+                  {brigada.activo ? 'Activo' : 'Inactivo'}
+                </span>
               </div>
             </div>
             
             <div className="card-footer">
               <span className="date">
-                {new Date(brigada.fecha_registro).toLocaleDateString()}
+                {brigada.createdAt ? new Date(brigada.createdAt).toLocaleDateString() : 'Sin fecha'}
               </span>
-              <span className="status active">Activo</span>
             </div>
           </div>
         ))}
@@ -422,34 +334,35 @@ const BomberosApp = () => {
   // Componente de Progress Bar
   const ProgressBar = () => (
     <div className="progress-container">
-      <div className="progress-header">
-        <h2>Progreso del Formulario</h2>
-        <span className="progress-text">
-          Paso {currentStep + 1} de {steps.length}
-        </span>
+  <div className="progress-header">
+    <h2>Progreso del Formulario</h2>
+    <span className="progress-text">
+      Paso {currentStep + 1} de {steps.length}
+    </span>
+  </div>
+
+  <div className="progress-bar">
+    <div 
+      className="progress-fill"
+      style={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
+    ></div>
+  </div>
+
+  <div className="steps-indicators">
+    {steps.map((step, index) => (
+      <div 
+        key={step.id}
+        className={`step-indicator ${index <= currentStep ? 'completed' : ''} ${index === currentStep ? 'current' : ''}`}
+      >
+        <div className={`step-circle ${step.color}`}>
+          <step.icon size={16} />
+        </div>
+        <span className="step-title">{step.title}</span>
       </div>
-      
-      <div className="progress-bar">
-        <div 
-          className="progress-fill"
-          style={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
-        ></div>
-      </div>
-      
-      <div className="steps-indicators">
-        {steps.map((step, index) => (
-          <div 
-            key={step.id}
-            className={`step-indicator ${index <= currentStep ? 'completed' : ''} ${index === currentStep ? 'current' : ''}`}
-          >
-            <div className={`step-circle ${step.color}`}>
-              <step.icon size={16} />
-            </div>
-            <span className="step-title">{step.title}</span>
-          </div>
-        ))}
-      </div>
-    </div>
+    ))}
+  </div>
+</div>
+
   );
 
   // Componente de Step 0 - Información General
@@ -466,113 +379,37 @@ const BomberosApp = () => {
           <input
             type="text"
             className="form-input"
-            value={formData.brigada.nombre_brigada}
-            onChange={(e) => updateFormData('brigada', 'nombre_brigada', e.target.value)}
+            value={formData.brigada.nombre}
+            onChange={(e) => updateFormData('brigada', 'nombre', e.target.value)}
             placeholder="Ej: Brigada Forestal Central"
+            required
           />
         </div>
         
         <div className="form-group">
-          <label>Cantidad de Bomberos Activos</label>
-          <input
-            type="number"
-            className="form-input"
-            value={formData.brigada.cantidad_bomberos_activos}
-            onChange={(e) => updateFormData('brigada', 'cantidad_bomberos_activos', parseInt(e.target.value) || 0)}
-            placeholder="0"
+          <label>Descripción</label>
+          <textarea
+            className="form-textarea"
+            value={formData.brigada.descripcion}
+            onChange={(e) => updateFormData('brigada', 'descripcion', e.target.value)}
+            placeholder="Descripción de la brigada"
+            rows="3"
           />
         </div>
         
         <div className="form-group">
-          <label>Contacto Celular del Comandante</label>
-          <input
-            type="tel"
-            className="form-input"
-            value={formData.brigada.contacto_celular_comandante}
-            onChange={(e) => updateFormData('brigada', 'contacto_celular_comandante', e.target.value)}
-            placeholder="Ej: +591 70123456"
-          />
-        </div>
-        
-        <div className="form-group">
-          <label>Encargado de Logística</label>
-          <input
-            type="text"
-            className="form-input"
-            value={formData.brigada.encargado_logistica}
-            onChange={(e) => updateFormData('brigada', 'encargado_logistica', e.target.value)}
-            placeholder="Nombre completo"
-          />
-        </div>
-        
-        <div className="form-group">
-          <label>Contacto Celular de Logística</label>
-          <input
-            type="tel"
-            className="form-input"
-            value={formData.brigada.contacto_celular_logistica}
-            onChange={(e) => updateFormData('brigada', 'contacto_celular_logistica', e.target.value)}
-            placeholder="Ej: +591 70123456"
-          />
-        </div>
-        
-        <div className="form-group">
-          <label>Número de Emergencia Público</label>
-          <input
-            type="tel"
-            className="form-input"
-            value={formData.brigada.numero_emergencia_publico}
-            onChange={(e) => updateFormData('brigada', 'numero_emergencia_publico', e.target.value)}
-            placeholder="Ej: 911"
-          />
+          <label>
+            <input
+              type="checkbox"
+              checked={formData.brigada.activo}
+              onChange={(e) => updateFormData('brigada', 'activo', e.target.checked)}
+            />
+            Brigada Activa
+          </label>
         </div>
       </div>
     </div>
   );
-
-  // Componente genérico para equipamiento
-  const EquipamientoGenericoStep = ({ title, description, catalogKey, section }) => {
-    const catalog = catalogos[catalogKey] || [];
-    
-    return (
-      <div className="form-step">
-        <div className="step-header">
-          <h2>{title}</h2>
-          <p>{description}</p>
-        </div>
-        
-        <div className="equipamiento-grid">
-          {catalog.map((item) => (
-            <div key={item.id} className="equipamiento-card">
-              <div className="card-content">
-                <h4>{item.nombre}</h4>
-                <p>{item.descripcion}</p>
-                
-                <div className="quantity-controls">
-                  <label>Cantidad</label>
-                  <input
-                    type="number"
-                    className="quantity-input"
-                    min="0"
-                    placeholder="0"
-                  />
-                </div>
-                
-                <div className="form-group">
-                  <label>Observaciones</label>
-                  <textarea
-                    className="form-textarea"
-                    rows="2"
-                    placeholder="Observaciones adicionales..."
-                  />
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  };
 
   // Componente de Form View
   const FormView = () => (
@@ -582,84 +419,22 @@ const BomberosApp = () => {
       <div className="form-content">
         {currentStep === 0 && <InformacionGeneralStep />}
         {currentStep === 1 && (
-          <EquipamientoGenericoStep 
-            title="Equipamiento de Ropa"
-            description="Selecciona y especifica las cantidades de ropa forestal necesaria"
-            catalogKey="tipos_ropa"
-            section="ropa"
-          />
+          <div className="form-step">
+            <h2>Equipamiento de Ropa</h2>
+            <p>Próximamente...</p>
+          </div>
         )}
         {currentStep === 2 && (
-          <EquipamientoGenericoStep 
-            title="Equipamiento EPP"
-            description="Especifica los elementos de protección personal requeridos"
-            catalogKey="equipamiento_epp"
-            section="epp"
-          />
+          <div className="form-step">
+            <h2>Equipamiento de Botas</h2>
+            <p>Próximamente...</p>
+          </div>
         )}
         {currentStep === 3 && (
-          <EquipamientoGenericoStep 
-            title="Herramientas"
-            description="Detalla las herramientas necesarias para las operaciones"
-            catalogKey="herramientas"
-            section="herramientas"
-          />
-        )}
-        {currentStep === 4 && (
-          <EquipamientoGenericoStep 
-            title="Logística de Vehículos"
-            description="Especifica los servicios y mantenimiento de vehículos"
-            catalogKey="servicios_vehiculos"
-            section="vehiculos"
-          />
-        )}
-        {currentStep === 5 && (
-          <EquipamientoGenericoStep 
-            title="Alimentación y Bebidas"
-            description="Detalla los alimentos y bebidas necesarios"
-            catalogKey="alimentos_bebidas"
-            section="alimentacion"
-          />
-        )}
-        {currentStep === 6 && (
-          <EquipamientoGenericoStep 
-            title="Equipo de Campo"
-            description="Especifica el equipo necesario para operaciones en campo"
-            catalogKey="equipo_campo"
-            section="equipo_campo"
-          />
-        )}
-        {currentStep === 7 && (
-          <EquipamientoGenericoStep 
-            title="Limpieza Personal"
-            description="Detalla los productos de higiene personal requeridos"
-            catalogKey="limpieza_personal"
-            section="limpieza_personal"
-          />
-        )}
-        {currentStep === 8 && (
-          <EquipamientoGenericoStep 
-            title="Limpieza General"
-            description="Especifica los productos de limpieza general"
-            catalogKey="limpieza_general"
-            section="limpieza_general"
-          />
-        )}
-        {currentStep === 9 && (
-          <EquipamientoGenericoStep 
-            title="Medicamentos"
-            description="Detalla los medicamentos y suministros médicos necesarios"
-            catalogKey="medicamentos"
-            section="medicamentos"
-          />
-        )}
-        {currentStep === 10 && (
-          <EquipamientoGenericoStep 
-            title="Rescate Animal"
-            description="Especifica los alimentos para animales en operaciones de rescate"
-            catalogKey="alimentos_animales"
-            section="rescate_animal"
-          />
+          <div className="form-step">
+            <h2>Equipamiento de Guantes</h2>
+            <p>Próximamente...</p>
+          </div>
         )}
       </div>
       
@@ -674,14 +449,22 @@ const BomberosApp = () => {
         </button>
         
         {currentStep < steps.length - 1 ? (
-          <button className="nav-btn primary" onClick={nextStep}>
+          <button 
+            className="nav-btn primary" 
+            onClick={nextStep}
+            disabled={currentStep === 0 && !formData.brigada.nombre}
+          >
             Siguiente
             <ChevronRight size={20} />
           </button>
         ) : (
-          <button className="nav-btn success" onClick={handleSubmitForm}>
+          <button 
+            className="nav-btn success" 
+            onClick={handleSubmitForm}
+            disabled={loading || !formData.brigada.nombre}
+          >
             <Save size={20} />
-            Guardar Formulario
+            {loading ? 'Guardando...' : 'Guardar Formulario'}
           </button>
         )}
       </div>

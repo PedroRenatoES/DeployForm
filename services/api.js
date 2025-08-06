@@ -1,9 +1,11 @@
 // src/services/api.js
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
+// SOLUCIÓN RÁPIDA: Hardcodear la URL
+const API_BASE_URL = 'http://localhost:3000/api';
 
 class ApiService {
   constructor() {
     this.baseURL = API_BASE_URL;
+    console.log('🔧 API Service initialized with base URL:', this.baseURL);
   }
 
   async request(endpoint, options = {}) {
@@ -17,16 +19,38 @@ class ApiService {
     };
 
     try {
+      console.log('🚀 API Request:', url, config);
+      
       const response = await fetch(url, config);
-      const data = await response.json();
+      
+      let data;
+      const contentType = response.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        data = await response.json();
+      } else {
+        const text = await response.text();
+        console.warn('⚠️ Response is not JSON:', text);
+        throw new Error(`Server returned non-JSON response: ${response.status} ${response.statusText}`);
+      }
+
+      console.log('📦 API Response:', response.status, data);
 
       if (!response.ok) {
-        throw new Error(data.message || 'Error en la petición');
+        throw new Error(data.message || data.error || `HTTP Error: ${response.status}`);
       }
 
       return data;
     } catch (error) {
-      console.error('API Error:', error);
+      console.error('❌ API Error:', {
+        url,
+        error: error.message,
+        config
+      });
+      
+      if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
+        throw new Error('No se puede conectar con el servidor. Verifica que el backend esté funcionando en el puerto 3000.');
+      }
+      
       throw error;
     }
   }
@@ -41,16 +65,30 @@ class ApiService {
   }
 
   async createBrigada(brigadaData) {
+    const backendData = {
+      nombre: brigadaData.nombre,
+      descripcion: brigadaData.descripcion || '',
+      activo: brigadaData.activo !== undefined ? brigadaData.activo : true
+    };
+
+    console.log('📝 Creating brigada:', backendData);
+    
     return this.request('/brigadas', {
       method: 'POST',
-      body: JSON.stringify(brigadaData),
+      body: JSON.stringify(backendData),
     });
   }
 
   async updateBrigada(id, brigadaData) {
+    const backendData = {
+      nombre: brigadaData.nombre,
+      descripcion: brigadaData.descripcion || '',
+      activo: brigadaData.activo !== undefined ? brigadaData.activo : true
+    };
+
     return this.request(`/brigadas/${id}`, {
       method: 'PUT',
-      body: JSON.stringify(brigadaData),
+      body: JSON.stringify(backendData),
     });
   }
 
@@ -61,201 +99,80 @@ class ApiService {
   }
 
   // Catálogos
-  async getCatalogo(tipo) {
-    return this.request(`/catalogos/${tipo}`);
+  async getTiposRopa() {
+    return this.request('/catalogos/tipos-ropa');
   }
 
-  async createCatalogoItem(tipo, itemData) {
-    return this.request(`/catalogos/${tipo}`, {
+  async createTipoRopa(itemData) {
+    return this.request('/catalogos/tipos-ropa', {
       method: 'POST',
       body: JSON.stringify(itemData),
     });
   }
 
-  async updateCatalogoItem(tipo, id, itemData) {
-    return this.request(`/catalogos/${tipo}/${id}`, {
+  async updateTipoRopa(id, itemData) {
+    return this.request(`/catalogos/tipos-ropa/${id}`, {
       method: 'PUT',
       body: JSON.stringify(itemData),
     });
   }
 
-  async deleteCatalogoItem(tipo, id) {
-    return this.request(`/catalogos/${tipo}/${id}`, {
+  async deleteTipoRopa(id) {
+    return this.request(`/catalogos/tipos-ropa/${id}`, {
       method: 'DELETE',
     });
   }
 
   // Equipamiento
-  async getEquipamiento(brigadaId, tipo) {
-    return this.request(`/equipamiento/${brigadaId}/${tipo}`);
-  }
-
-  async createEquipamiento(brigadaId, tipo, equipamientoData) {
-    return this.request(`/equipamiento/${brigadaId}/${tipo}`, {
-      method: 'POST',
-      body: JSON.stringify(equipamientoData),
-    });
-  }
-
-  async updateEquipamiento(brigadaId, tipo, id, equipamientoData) {
-    return this.request(`/equipamiento/${brigadaId}/${tipo}/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(equipamientoData),
-    });
-  }
-
-  async deleteEquipamiento(brigadaId, tipo, id) {
-    return this.request(`/equipamiento/${brigadaId}/${tipo}/${id}`, {
-      method: 'DELETE',
-    });
-  }
-
-  // Métodos específicos para cada tipo de equipamiento
   async getEquipamientoRopa(brigadaId) {
-    return this.getEquipamiento(brigadaId, 'ropa');
+    return this.request(`/equipamiento/${brigadaId}/ropa`);
+  }
+
+  async createEquipamientoRopa(brigadaId, ropaData) {
+    return this.request(`/equipamiento/${brigadaId}/ropa`, {
+      method: 'POST',
+      body: JSON.stringify(ropaData),
+    });
   }
 
   async getEquipamientoBotas(brigadaId) {
-    return this.getEquipamiento(brigadaId, 'botas');
-  }
-
-  async getEquipamientoGuantes(brigadaId) {
-    return this.getEquipamiento(brigadaId, 'guantes');
-  }
-
-  async getEquipamientoEPP(brigadaId) {
-    return this.getEquipamiento(brigadaId, 'epp');
-  }
-
-  async getHerramientas(brigadaId) {
-    return this.getEquipamiento(brigadaId, 'herramientas');
-  }
-
-  async getLogisticaVehiculos(brigadaId) {
-    return this.getEquipamiento(brigadaId, 'logistica-vehiculos');
-  }
-
-  async getAlimentacion(brigadaId) {
-    return this.getEquipamiento(brigadaId, 'alimentacion');
-  }
-
-  async getEquipoCampo(brigadaId) {
-    return this.getEquipamiento(brigadaId, 'equipo-campo');
-  }
-
-  async getLimpiezaPersonal(brigadaId) {
-    return this.getEquipamiento(brigadaId, 'limpieza-personal');
-  }
-
-  async getLimpiezaGeneral(brigadaId) {
-    return this.getEquipamiento(brigadaId, 'limpieza-general');
-  }
-
-  async getMedicamentos(brigadaId) {
-    return this.getEquipamiento(brigadaId, 'medicamentos');
-  }
-
-  async getRescateAnimal(brigadaId) {
-    return this.getEquipamiento(brigadaId, 'rescate-animal');
-  }
-
-  // Métodos para crear equipamiento específico
-  async createEquipamientoRopa(brigadaId, ropaData) {
-    return this.createEquipamiento(brigadaId, 'ropa', ropaData);
+    return this.request(`/equipamiento/${brigadaId}/botas`);
   }
 
   async createEquipamientoBotas(brigadaId, botasData) {
-    return this.createEquipamiento(brigadaId, 'botas', botasData);
+    return this.request(`/equipamiento/${brigadaId}/botas`, {
+      method: 'POST',
+      body: JSON.stringify(botasData),
+    });
+  }
+
+  async getEquipamientoGuantes(brigadaId) {
+    return this.request(`/equipamiento/${brigadaId}/guantes`);
   }
 
   async createEquipamientoGuantes(brigadaId, guantesData) {
-    return this.createEquipamiento(brigadaId, 'guantes', guantesData);
-  }
-
-  async createEquipamientoEPP(brigadaId, eppData) {
-    return this.createEquipamiento(brigadaId, 'epp', eppData);
-  }
-
-  async createHerramientas(brigadaId, herramientasData) {
-    return this.createEquipamiento(brigadaId, 'herramientas', herramientasData);
-  }
-
-  async createLogisticaVehiculos(brigadaId, vehiculosData) {
-    return this.createEquipamiento(brigadaId, 'logistica-vehiculos', vehiculosData);
-  }
-
-  async createAlimentacion(brigadaId, alimentacionData) {
-    return this.createEquipamiento(brigadaId, 'alimentacion', alimentacionData);
-  }
-
-  async createEquipoCampo(brigadaId, equipoCampoData) {
-    return this.createEquipamiento(brigadaId, 'equipo-campo', equipoCampoData);
-  }
-
-  async createLimpiezaPersonal(brigadaId, limpiezaPersonalData) {
-    return this.createEquipamiento(brigadaId, 'limpieza-personal', limpiezaPersonalData);
-  }
-
-  async createLimpiezaGeneral(brigadaId, limpiezaGeneralData) {
-    return this.createEquipamiento(brigadaId, 'limpieza-general', limpiezaGeneralData);
-  }
-
-  async createMedicamentos(brigadaId, medicamentosData) {
-    return this.createEquipamiento(brigadaId, 'medicamentos', medicamentosData);
-  }
-
-  async createRescateAnimal(brigadaId, rescateAnimalData) {
-    return this.createEquipamiento(brigadaId, 'rescate-animal', rescateAnimalData);
+    return this.request(`/equipamiento/${brigadaId}/guantes`, {
+      method: 'POST',
+      body: JSON.stringify(guantesData),
+    });
   }
 
   // Método para obtener formulario completo de una brigada
   async getFormularioCompleto(brigadaId) {
     try {
-      const [
-        brigada,
-        ropa,
-        botas,
-        guantes,
-        epp,
-        herramientas,
-        vehiculos,
-        alimentacion,
-        equipoCampo,
-        limpiezaPersonal,
-        limpiezaGeneral,
-        medicamentos,
-        rescateAnimal
-      ] = await Promise.all([
+      const [brigada, ropa, botas, guantes] = await Promise.all([
         this.getBrigadaById(brigadaId),
-        this.getEquipamientoRopa(brigadaId),
-        this.getEquipamientoBotas(brigadaId),
-        this.getEquipamientoGuantes(brigadaId),
-        this.getEquipamientoEPP(brigadaId),
-        this.getHerramientas(brigadaId),
-        this.getLogisticaVehiculos(brigadaId),
-        this.getAlimentacion(brigadaId),
-        this.getEquipoCampo(brigadaId),
-        this.getLimpiezaPersonal(brigadaId),
-        this.getLimpiezaGeneral(brigadaId),
-        this.getMedicamentos(brigadaId),
-        this.getRescateAnimal(brigadaId)
+        this.getEquipamientoRopa(brigadaId).catch(() => ({ data: [] })),
+        this.getEquipamientoBotas(brigadaId).catch(() => ({ data: [] })),
+        this.getEquipamientoGuantes(brigadaId).catch(() => ({ data: [] }))
       ]);
 
       return {
         brigada: brigada.data,
         equipamiento: {
-          ropa: ropa.data,
-          botas: botas.data,
-          guantes: guantes.data,
-          epp: epp.data,
-          herramientas: herramientas.data,
-          vehiculos: vehiculos.data,
-          alimentacion: alimentacion.data,
-          equipo_campo: equipoCampo.data,
-          limpieza_personal: limpiezaPersonal.data,
-          limpieza_general: limpiezaGeneral.data,
-          medicamentos: medicamentos.data,
-          rescate_animal: rescateAnimal.data
+          ropa: ropa.data || [],
+          botas: botas.data || [],
+          guantes: guantes.data || []
         }
       };
     } catch (error) {
@@ -264,36 +181,46 @@ class ApiService {
     }
   }
 
-  // Método para cargar todos los catálogos
+  // Método simplificado para cargar catálogos existentes
   async getAllCatalogos() {
     try {
-      const catalogTypes = [
-        'tipos-ropa',
-        'equipamiento-epp',
-        'herramientas',
-        'servicios-vehiculos',
-        'alimentos-bebidas',
-        'equipo-campo',
-        'limpieza-personal',
-        'limpieza-general',
-        'medicamentos',
-        'alimentos-animales'
-      ];
-
-      const results = await Promise.all(
-        catalogTypes.map(type => this.getCatalogo(type))
-      );
-
-      const catalogos = {};
-      catalogTypes.forEach((type, index) => {
-        const key = type.replace('-', '_');
-        catalogos[key] = results[index].success ? results[index].data : [];
-      });
-
-      return catalogos;
+      const tiposRopa = await this.getTiposRopa().catch(() => ({ success: false, data: [] }));
+      
+      return {
+        tipos_ropa: tiposRopa.success ? tiposRopa.data : []
+      };
     } catch (error) {
       console.error('Error cargando catálogos:', error);
-      throw error;
+      return {
+        tipos_ropa: []
+      };
+    }
+  }
+
+  // Método para probar la conexión
+  async testConnection() {
+    try {
+      console.log('🧪 Testing connection to:', `${this.baseURL}/brigadas`);
+      const response = await fetch(`${this.baseURL}/brigadas`);
+      
+      console.log('🧪 Test response:', {
+        status: response.status,
+        statusText: response.statusText,
+        ok: response.ok
+      });
+      
+      return {
+        success: response.ok,
+        status: response.status,
+        message: response.ok ? 'Conexión exitosa' : `Error ${response.status}: ${response.statusText}`
+      };
+    } catch (error) {
+      console.error('🧪 Connection test failed:', error);
+      return {
+        success: false,
+        status: 0,
+        message: error.message
+      };
     }
   }
 }

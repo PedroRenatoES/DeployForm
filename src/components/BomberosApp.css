@@ -804,6 +804,33 @@ body {
 }
 
 
+/*SELECTS ESTILOS*/
+.form-select {
+  padding: var(--spacing-md);
+  border: 2px solid rgba(0, 0, 0, 0.1);
+  border-radius: var(--border-radius);
+  font-size: 1rem;
+  background: var(--bg-card);
+  transition: var(--transition);
+  color: var(--text-primary);
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg width='10' height='5' viewBox='0 0 10 5' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0l5 5 5-5z' fill='%23343a40'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 10px 5px;
+}
+
+.form-select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+
+
+
 
 /*MODAL COSO*/
 .modal-overlay {

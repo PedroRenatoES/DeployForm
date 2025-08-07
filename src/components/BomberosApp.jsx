@@ -296,6 +296,7 @@ const InformacionGeneralStep = memo(({ formData, selectedBrigada, updateFormData
           value={formData.brigada.NombreBrigada}
           onChange={(e) => updateFormData('brigada', 'NombreBrigada', e.target.value)}
           placeholder="Ej: Brigada Forestal Central"
+          maxLength={80}
           required
         />
       </div>
@@ -318,11 +319,19 @@ const InformacionGeneralStep = memo(({ formData, selectedBrigada, updateFormData
           type="tel"
           className="form-input"
           value={formData.brigada.ContactoCelularComandante}
-          onChange={(e) => updateFormData('brigada', 'ContactoCelularComandante', e.target.value)}
-          placeholder="Ej: +56912345678"
-          maxLength="20"
+          onChange={(e) => {
+            const onlyNumbers = e.target.value.replace(/\D/g, ''); // Elimina todo lo que no sea número
+            if (onlyNumbers.length <= 15) {
+              updateFormData('brigada', 'ContactoCelularComandante', onlyNumbers);
+            }
+          }}
+          placeholder="Ej: 59171234567"
+          maxLength={15}
+          inputMode="numeric"
+          pattern="\d*"
         />
       </div>
+
       
       <div className="form-group">
         <label>Encargado de Logística</label>
@@ -332,7 +341,7 @@ const InformacionGeneralStep = memo(({ formData, selectedBrigada, updateFormData
           value={formData.brigada.EncargadoLogistica}
           onChange={(e) => updateFormData('brigada', 'EncargadoLogistica', e.target.value)}
           placeholder="Nombre del encargado de logística"
-          maxLength="255"
+          maxLength={60}
         />
       </div>
       
@@ -342,11 +351,19 @@ const InformacionGeneralStep = memo(({ formData, selectedBrigada, updateFormData
           type="tel"
           className="form-input"
           value={formData.brigada.ContactoCelularLogistica}
-          onChange={(e) => updateFormData('brigada', 'ContactoCelularLogistica', e.target.value)}
-          placeholder="Ej: +56987654321"
-          maxLength="20"
+          onChange={(e) => {
+            const onlyNumbers = e.target.value.replace(/\D/g, '');
+            if (onlyNumbers.length <= 15) {
+              updateFormData('brigada', 'ContactoCelularLogistica', onlyNumbers);
+            }
+          }}
+          placeholder="Ej: 59176543210"
+          inputMode="numeric"
+          pattern="\d*"
+          maxLength={15}
         />
       </div>
+
       
       <div className="form-group">
         <label>Número de Emergencia Público</label>
@@ -354,11 +371,19 @@ const InformacionGeneralStep = memo(({ formData, selectedBrigada, updateFormData
           type="tel"
           className="form-input"
           value={formData.brigada.NumeroEmergenciaPublico}
-          onChange={(e) => updateFormData('brigada', 'NumeroEmergenciaPublico', e.target.value)}
+          onChange={(e) => {
+            const onlyNumbers = e.target.value.replace(/\D/g, '');
+            if (onlyNumbers.length <= 6) {
+              updateFormData('brigada', 'NumeroEmergenciaPublico', onlyNumbers);
+            }
+          }}
           placeholder="Ej: 132"
-          maxLength="20"
+          inputMode="numeric"
+          pattern="\d*"
+          maxLength={6}
         />
       </div>
+
     </div>
   </div>
 ));
@@ -568,10 +593,16 @@ const BotasGuantesStep = memo(({ formData, updateFormData }) => {
                 type="text"
                 className="form-input"
                 value={botasCantidades.OtraTalla}
-                onChange={(e) => setBotasCantidades({...botasCantidades, OtraTalla: e.target.value})}
-                placeholder="Especificar talla"
+                onChange={(e) => {
+                  const soloNumeros = e.target.value.replace(/\D/g, '').slice(0, 2); // solo dígitos, máx 2
+                  setBotasCantidades({ ...botasCantidades, OtraTalla: soloNumeros });
+                }}
+                placeholder="Ej: 44"
+                inputMode="numeric"
+                maxLength={2}
               />
             </div>
+
             <div className="form-group">
               <label>Cantidad Otra Talla</label>
               <input
@@ -597,6 +628,23 @@ const BotasGuantesStep = memo(({ formData, updateFormData }) => {
             <Plus size={16} />
             Agregar Botas
           </button>
+          {formData.equipamiento.botas.length > 0 && (
+  <div className="items-list">
+    <h3>Botas Agregadas:</h3>
+    {formData.equipamiento.botas.map((item, index) => (
+      <div key={index} className="item-card">
+        <p><strong>Cantidades:</strong> 37: {item.Talla37}, 38: {item.Talla38}, 39: {item.Talla39}, 40: {item.Talla40}, 41: {item.Talla41}, 42: {item.Talla42}, 43: {item.Talla43}</p>
+        {item.OtraTalla && (
+          <p><strong>Otra talla ({item.OtraTalla}):</strong> {item.CantidadOtraTalla}</p>
+        )}
+        {item.Observaciones && (
+          <p><em>{item.Observaciones}</em></p>
+        )}
+      </div>
+    ))}
+  </div>
+)}
+
         </div>
 
         {/* Sección Guantes */}
@@ -623,10 +671,16 @@ const BotasGuantesStep = memo(({ formData, updateFormData }) => {
                 type="text"
                 className="form-input"
                 value={guantesCantidades.OtraTalla}
-                onChange={(e) => setGuantesCantidades({...guantesCantidades, OtraTalla: e.target.value})}
-                placeholder="Especificar talla"
+                onChange={(e) => {
+                  const soloLetras = e.target.value.replace(/[^a-zA-Z]/g, '').slice(0, 3); // solo letras, máx 3
+                  setGuantesCantidades({ ...guantesCantidades, OtraTalla: soloLetras.toUpperCase() });
+                }}
+                placeholder="Ej: XXL"
+                maxLength={3}
               />
             </div>
+
+
             <div className="form-group">
               <label>Cantidad Otra Talla</label>
               <input
@@ -652,6 +706,24 @@ const BotasGuantesStep = memo(({ formData, updateFormData }) => {
             <Plus size={16} />
             Agregar Guantes
           </button>
+
+          {formData.equipamiento.guantes.length > 0 && (
+  <div className="items-list">
+    <h3>Guantes Agregados:</h3>
+    {formData.equipamiento.guantes.map((item, index) => (
+      <div key={index} className="item-card">
+        <p><strong>Cantidades:</strong> XS: {item.TallaXS}, S: {item.TallaS}, M: {item.TallaM}, L: {item.TallaL}, XL: {item.TallaXL}, XXL: {item.TallaXXL}</p>
+        {item.OtraTalla && (
+          <p><strong>Otra talla ({item.OtraTalla}):</strong> {item.CantidadOtraTalla}</p>
+        )}
+        {item.Observaciones && (
+          <p><em>{item.Observaciones}</em></p>
+        )}
+      </div>
+    ))}
+  </div>
+)}
+
         </div>
       </div>
     );

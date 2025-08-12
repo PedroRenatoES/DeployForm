@@ -28,14 +28,18 @@ import apiService from '../../services/api';
 
 // ✅ TODOS LOS COMPONENTES FUERA DEL COMPONENTE PRINCIPAL
 
-// Componente de navegación
-const Sidebar = memo(({ currentView, setCurrentView }) => (
-  <div className="sidebar">
+// Componente de navegación - Modificado para sidebar colapsable
+const Sidebar = memo(({ currentView, setCurrentView, isExpanded, setIsExpanded }) => (
+  <div 
+    className={`sidebar ${isExpanded ? 'expanded' : ''}`}
+    onMouseEnter={() => setIsExpanded(true)}
+    onMouseLeave={() => setIsExpanded(false)}
+  >
     <div className="sidebar-header">
-      <h2 className="sidebar-title">
+      <div className="logo-container">
         <Users className="sidebar-icon" />
-        Bomberos 2025
-      </h2>
+        {isExpanded && <span className="sidebar-title">Bomberos 2025</span>}
+      </div>
     </div>
     
     <nav className="sidebar-nav">
@@ -44,7 +48,7 @@ const Sidebar = memo(({ currentView, setCurrentView }) => (
         onClick={() => setCurrentView('home')}
       >
         <Home size={20} />
-        Inicio
+        {isExpanded && <span>Inicio</span>}
       </button>
       
       <button 
@@ -52,7 +56,7 @@ const Sidebar = memo(({ currentView, setCurrentView }) => (
         onClick={() => setCurrentView('board')}
       >
         <FileText size={20} />
-        Formularios
+        {isExpanded && <span>Formularios</span>}
       </button>
     </nav>
   </div>
@@ -63,7 +67,6 @@ const HomeView = memo(({ brigadas, handleCreateForm }) => (
   <div className="home-container">
     <div className="home-content">
       <div className="home-hero">
-        <div className="hero-background"></div>
         <div className="hero-content">
           <h1 className="hero-title">
             Sistema de Formularios
@@ -81,7 +84,7 @@ const HomeView = memo(({ brigadas, handleCreateForm }) => (
       
       <div className="stats-grid">
         <div className="stat-card">
-          <div className="stat-icon blue">
+          <div className="stat-icon">
             <Users size={32} />
           </div>
           <div className="stat-info">
@@ -91,7 +94,7 @@ const HomeView = memo(({ brigadas, handleCreateForm }) => (
         </div>
         
         <div className="stat-card">
-          <div className="stat-icon orange">
+          <div className="stat-icon">
             <ShieldCheck size={32} />
           </div>
           <div className="stat-info">
@@ -524,7 +527,6 @@ const EquipamientoRopaStep = memo(({ formData, updateFormData, catalogos }) => {
             <div key={index} className="item-card">
               <p><strong>Tipo:</strong> {catalogos.tipos_ropa.find(t => t.id === item.TipoRopaID)?.nombre || 'N/A'}</p>
               <p><strong>Cantidades:</strong> XS: {item.CantidadXS}, S: {item.CantidadS}, M: {item.CantidadM}, L: {item.CantidadL}, XL: {item.CantidadXL}</p>
-              {item.Observaciones && <p><strong>Observaciones:</strong> {item.Observaciones}</p>}
             </div>
           ))}
         </div>
@@ -637,9 +639,6 @@ const BotasGuantesStep = memo(({ formData, updateFormData }) => {
         {item.OtraTalla && (
           <p><strong>Otra talla ({item.OtraTalla}):</strong> {item.CantidadOtraTalla}</p>
         )}
-        {item.Observaciones && (
-          <p><em>{item.Observaciones}</em></p>
-        )}
       </div>
     ))}
   </div>
@@ -715,9 +714,6 @@ const BotasGuantesStep = memo(({ formData, updateFormData }) => {
         <p><strong>Cantidades:</strong> XS: {item.TallaXS}, S: {item.TallaS}, M: {item.TallaM}, L: {item.TallaL}, XL: {item.TallaXL}, XXL: {item.TallaXXL}</p>
         {item.OtraTalla && (
           <p><strong>Otra talla ({item.OtraTalla}):</strong> {item.CantidadOtraTalla}</p>
-        )}
-        {item.Observaciones && (
-          <p><em>{item.Observaciones}</em></p>
         )}
       </div>
     ))}
@@ -833,7 +829,6 @@ const EquipamientoGenericoStep = memo(({ title, description, catalogKey, equipam
               <p><strong>Item:</strong> {catalogo.find(c => c.id === item[idField])?.nombre || 'N/A'}</p>
               <p><strong>Cantidad:</strong> {item.Cantidad}</p>
               {showMonto && <p><strong>Monto:</strong> ${item.MontoAproximado}</p>}
-              {item.Observaciones && <p><strong>Observaciones:</strong> {item.Observaciones}</p>}
             </div>
           ))}
         </div>
@@ -1056,6 +1051,7 @@ const BomberosApp = () => {
   const [error, setError] = useState(null);
   const [detalleBrigada, setDetalleBrigada] = useState(null);
   const [mostrarModal, setMostrarModal] = useState(false);
+  const [sidebarExpanded, setSidebarExpanded] = useState(false); // Nuevo estado para sidebar
 
   // Estados para el formulario
   const [currentStep, setCurrentStep] = useState(0);
@@ -1409,10 +1405,12 @@ const BomberosApp = () => {
     <div className="app">
       <Sidebar 
         currentView={currentView} 
-        setCurrentView={setCurrentView} 
+        setCurrentView={setCurrentView}
+        isExpanded={sidebarExpanded}
+        setIsExpanded={setSidebarExpanded}
       />
       
-      <main className="main-content">
+      <main className={`main-content ${sidebarExpanded ? 'sidebar-expanded' : 'sidebar-collapsed'}`}>
         {currentView === 'home' && (
           <HomeView 
             brigadas={brigadas} 
@@ -1486,7 +1484,6 @@ const BomberosApp = () => {
                   <div key={i} className="cuadrilla-item">
                     <p><strong>Tipo:</strong> {item.tipo}</p>
                     <p>XS: {item.cantidad_xs}, S: {item.cantidad_s}, M: {item.cantidad_m}, L: {item.cantidad_l}, XL: {item.cantidad_xl}</p>
-                    <p><em>{item.observaciones}</em></p>
                   </div>
                 ))}
               </div>
@@ -1501,7 +1498,6 @@ const BomberosApp = () => {
                     {item.otra_talla && (
                       <p>Otra talla ({item.otra_talla}): {item.cantidad_otra_talla}</p>
                     )}
-                    <p><em>{item.observaciones}</em></p>
                   </div>
                 ))}
               </div>
@@ -1516,7 +1512,6 @@ const BomberosApp = () => {
                     {item.otra_talla && (
                       <p>Otra talla ({item.otra_talla}): {item.cantidad_otra_talla}</p>
                     )}
-                    <p><em>{item.observaciones}</em></p>
                   </div>
                 ))}
               </div>
@@ -1529,7 +1524,6 @@ const BomberosApp = () => {
                   <div key={i} className="cuadrilla-item">
                     <p><strong>Equipo:</strong> {item.tipo}</p>
                     <p>Cantidad: {item.cantidad}</p>
-                    <p><em>{item.observaciones}</em></p>
                   </div>
                 ))}
               </div>
@@ -1542,7 +1536,6 @@ const BomberosApp = () => {
                   <div key={i} className="cuadrilla-item">
                     <p><strong>Herramienta:</strong> {item.nombre}</p>
                     <p>Cantidad: {item.cantidad}</p>
-                    <p><em>{item.observaciones}</em></p>
                   </div>
                 ))}
               </div>
@@ -1555,7 +1548,6 @@ const BomberosApp = () => {
                   <div key={i} className="cuadrilla-item">
                     <p><strong>Servicio:</strong> {item.tipo}</p>
                     <p>Monto aproximado: Bs. {item.monto_aproximado}</p>
-                    <p><em>{item.observaciones}</em></p>
                   </div>
                 ))}
               </div>
@@ -1568,7 +1560,6 @@ const BomberosApp = () => {
                   <div key={i} className="cuadrilla-item">
                     <p><strong>Producto:</strong> {item.nombre}</p>
                     <p>Cantidad: {item.cantidad}</p>
-                    <p><em>{item.observaciones}</em></p>
                   </div>
                 ))}
               </div>
@@ -1581,7 +1572,6 @@ const BomberosApp = () => {
                   <div key={i} className="cuadrilla-item">
                     <p><strong>Equipo:</strong> {item.nombre}</p>
                     <p>Cantidad: {item.cantidad}</p>
-                    <p><em>{item.observaciones}</em></p>
                   </div>
                 ))}
               </div>
@@ -1594,7 +1584,6 @@ const BomberosApp = () => {
                   <div key={i} className="cuadrilla-item">
                     <p><strong>Producto:</strong> {item.nombre}</p>
                     <p>Cantidad: {item.cantidad}</p>
-                    <p><em>{item.observaciones}</em></p>
                   </div>
                 ))}
               </div>
@@ -1607,7 +1596,6 @@ const BomberosApp = () => {
                   <div key={i} className="cuadrilla-item">
                     <p><strong>Producto:</strong> {item.nombre}</p>
                     <p>Cantidad: {item.cantidad}</p>
-                    <p><em>{item.observaciones}</em></p>
                   </div>
                 ))}
               </div>
@@ -1620,7 +1608,6 @@ const BomberosApp = () => {
                   <div key={i} className="cuadrilla-item">
                     <p><strong>Medicamento:</strong> {item.nombre}</p>
                     <p>Cantidad: {item.cantidad}</p>
-                    <p><em>{item.observaciones}</em></p>
                   </div>
                 ))}
               </div>
@@ -1633,7 +1620,6 @@ const BomberosApp = () => {
                   <div key={i} className="cuadrilla-item">
                     <p><strong>Producto:</strong> {item.nombre}</p>
                     <p>Cantidad: {item.cantidad}</p>
-                    <p><em>{item.observaciones}</em></p>
                   </div>
                 ))}
               </div>

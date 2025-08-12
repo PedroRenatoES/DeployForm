@@ -85,6 +85,11 @@ body {
   height: 80px;
   display: flex;
   align-items: center;
+  justify-content: center;
+}
+
+.sidebar.expanded .sidebar-header {
+  justify-content: flex-start;
 }
 
 .logo-container {
@@ -96,6 +101,7 @@ body {
 .sidebar-icon {
   color: var(--color-white);
   min-width: 24px;
+  flex-shrink: 0;
 }
 
 .sidebar-title {
@@ -127,6 +133,11 @@ body {
   text-align: left;
   width: 100%;
   white-space: nowrap;
+  justify-content: center;
+}
+
+.sidebar.expanded .nav-item {
+  justify-content: flex-start;
 }
 
 .nav-item:hover {
@@ -138,6 +149,20 @@ body {
   background: var(--color-accent);
   color: var(--text-white);
   box-shadow: var(--shadow);
+}
+
+.nav-item svg {
+  flex-shrink: 0;
+  min-width: 20px;
+}
+
+/* Ajustes específicos para estado colapsado */
+.sidebar:not(.expanded) .nav-item {
+  padding: var(--spacing-md);
+}
+
+.sidebar:not(.expanded) .sidebar-header {
+  padding: var(--spacing-xl) var(--spacing-md);
 }
 
 /* Contenido principal */
@@ -440,7 +465,7 @@ body {
   padding: var(--spacing-xl);
   margin-bottom: var(--spacing-2xl);
   box-shadow: var(--shadow-md);
-  max-width: 1000px;              /* 👈 Ancho visual amigable */
+  max-width: 1000px;              /* 👈 Ancho visual amigable */  
   margin-left: auto;
   margin-right: auto;
   display: flex;
@@ -453,6 +478,7 @@ body {
 
 .progress-header {
   display: flex;
+  flex-direction: column;
   justify-content: space-between;
   align-items: center;
   margin-bottom: var(--spacing-lg);

@@ -249,38 +249,101 @@ const BoardView = memo(({
   </div>
 ));
 
+
 // Componente de Progress Bar
-const ProgressBar = memo(({ currentStep, steps }) => (
-  <div className="progress-container">
-    <div className="progress-header">
-      <h2>Progreso del Formulario</h2>
-      <span className="progress-text">
-        Paso {currentStep + 1} de {steps.length}
-      </span>
-    </div>
+const ProgressBar = memo(({ currentStep, steps }) => {
+  // Configuración del carrusel
+  const visibleSteps = 5; // Cantidad de pasos visibles a la vez
+  const [startIndex, setStartIndex] = useState(0);
 
-    <div className="progress-bar">
-      <div 
-        className="progress-fill"
-        style={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
-      ></div>
-    </div>
+  // Calcular el índice de inicio para centrar el paso actual
+  useEffect(() => {
+    const halfVisible = Math.floor(visibleSteps / 2);
+    let newStartIndex = currentStep - halfVisible;
+    
+    // Ajustar los límites
+    if (newStartIndex < 0) {
+      newStartIndex = 0;
+    } else if (newStartIndex + visibleSteps > steps.length) {
+      newStartIndex = Math.max(0, steps.length - visibleSteps);
+    }
+    
+    setStartIndex(newStartIndex);
+  }, [currentStep, steps.length]);
 
-    <div className="steps-indicators">
-      {steps.map((step, index) => (
+  // Pasos visibles para el carrusel
+  const visibleStepsData = steps.slice(startIndex, startIndex + visibleSteps);
+  const totalSteps = steps.length;
+
+  return (
+    <div className="progress-container">
+      <div className="progress-header">
+        <h2>Progreso del Formulario</h2>
+        <span className="progress-text">
+          Paso {currentStep + 1} de {steps.length}
+        </span>
+      </div>
+
+      <div className="progress-bar">
         <div 
-          key={step.id}
-          className={`step-indicator ${index <= currentStep ? 'completed' : ''} ${index === currentStep ? 'current' : ''}`}
-        >
-          <div className={`step-circle ${step.color}`}>
-            <step.icon size={16} />
+          className="progress-fill"
+          style={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
+        ></div>
+      </div>
+
+      <div className="carousel-container">
+        {/* Indicador de más elementos a la izquierda */}
+        {startIndex > 0 && (
+          <div className="carousel-indicator left">
+            <ChevronLeft size={16} />
+            <span className="indicator-count">+{startIndex}</span>
           </div>
-          <span className="step-title">{step.title}</span>
+        )}
+
+        {/* Pasos visibles */}
+        <div className="steps-carousel">
+          {visibleStepsData.map((step, index) => {
+            const actualIndex = startIndex + index;
+            return (
+              <div 
+                key={step.id}
+                className={`step-indicator ${actualIndex <= currentStep ? 'completed' : ''} ${actualIndex === currentStep ? 'current' : ''}`}
+              >
+                <div className={`step-circle ${step.color}`}>
+                  <step.icon size={16} />
+                </div>
+                <span className="step-title">{step.title}</span>
+              </div>
+            );
+          })}
         </div>
-      ))}
+
+        {/* Indicador de más elementos a la derecha */}
+        {startIndex + visibleSteps < totalSteps && (
+          <div className="carousel-indicator right">
+            <span className="indicator-count">+{totalSteps - (startIndex + visibleSteps)}</span>
+            <ChevronRight size={16} />
+          </div>
+        )}
+      </div>
+
+      {/* Mini indicadores de posición */}
+      <div className="position-indicators">
+        {Array.from({ length: Math.ceil(totalSteps / visibleSteps) }).map((_, index) => (
+          <div 
+            key={index} 
+            className={`position-dot ${Math.floor(currentStep / visibleSteps) === index ? 'active' : ''}`}
+          />
+        ))}
+      </div>
     </div>
-  </div>
-));
+  );
+});
+
+
+
+
+
 
 // Componente de Step 0 - Información General
 const InformacionGeneralStep = memo(({ formData, selectedBrigada, updateFormData }) => (

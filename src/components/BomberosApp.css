@@ -112,7 +112,7 @@ body {
 }
 
 .sidebar-nav {
-  padding: var(--spacing-lg);
+  padding: var(--spacing-lg) var(--spacing-md); /* 👈 Padding uniforme horizontal */
   display: flex;
   flex-direction: column;
   gap: var(--spacing-sm);
@@ -195,6 +195,7 @@ body {
   margin-bottom: var(--spacing-xl);
   box-shadow: var(--shadow);
   text-align: center;
+  padding-bottom: 1rem;
 }
 
 .hero-title {
@@ -562,6 +563,125 @@ body {
 .step-indicator.completed .step-circle {
   background: var(--color-dark);
 }
+
+
+.carousel-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-md);
+  position: relative;
+  width: 100%;
+  max-width: 800px;
+}
+
+.steps-carousel {
+  display: flex;
+  gap: var(--spacing-lg);
+  transition: all 0.4s ease-in-out;
+  overflow: hidden;
+  flex: 1;
+  justify-content: center;
+}
+
+.carousel-indicator {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm);
+  background: var(--color-light);
+  border-radius: var(--border-radius);
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  font-weight: 500;
+  min-width: 60px;
+  justify-content: center;
+  border: 2px solid var(--color-border);
+}
+
+.carousel-indicator.left {
+  flex-direction: row;
+}
+
+.carousel-indicator.right {
+  flex-direction: row-reverse;
+}
+
+.indicator-count {
+  font-weight: 600;
+  color: var(--color-accent);
+}
+
+.position-indicators {
+  display: flex;
+  gap: var(--spacing-xs);
+  justify-content: center;
+  margin-top: var(--spacing-md);
+}
+
+.position-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-light);
+  transition: var(--transition);
+  cursor: pointer;
+}
+
+.position-dot.active {
+  background: var(--color-accent);
+  transform: scale(1.2);
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+  .steps-carousel {
+    gap: var(--spacing-md);
+  }
+  
+  .step-indicator {
+    min-width: 80px;
+    padding: var(--spacing-sm);
+  }
+  
+  .step-title {
+    font-size: 0.75rem;
+  }
+  
+  .step-circle {
+    width: 35px;
+    height: 35px;
+  }
+  
+  .carousel-indicator {
+    min-width: 50px;
+    padding: var(--spacing-xs);
+  }
+}
+
+@media (max-width: 480px) {
+  .carousel-container {
+    gap: var(--spacing-sm);
+  }
+  
+  .steps-carousel {
+    gap: var(--spacing-sm);
+  }
+  
+  .step-indicator {
+    min-width: 70px;
+  }
+  
+  .step-circle {
+    width: 30px;
+    height: 30px;
+  }
+}
+
+
+
+
+
 
 .form-content {
   background: var(--color-white);

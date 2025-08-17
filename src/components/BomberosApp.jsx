@@ -346,47 +346,77 @@ const ProgressBar = memo(({ currentStep, steps }) => {
 
 
 // Componente de Step 0 - Información General
-const InformacionGeneralStep = memo(({ formData, selectedBrigada, updateFormData }) => (
+const InformacionGeneralStep = memo(({ formData, selectedBrigada, updateFormData, brigadas, onSelectBrigada }) => (
   <div className="form-step">
-    <div className="step-header">
-      <h2>{selectedBrigada ? 'Editar Brigada' : 'Datos de la Brigada'}</h2>
-      <p>Proporciona los datos básicos de la brigada de bomberos forestales</p>
+    <div className="form-group">
+      <label>Elegir Brigada Existente</label>
+      <select
+        className="form-select"
+        value={selectedBrigada ? selectedBrigada.id : ''}
+        onChange={e => {
+          const brigadaId = e.target.value;
+          const brigada = brigadas.find(b => b.id === parseInt(brigadaId));
+          if (brigada) {
+            onSelectBrigada(brigada);
+          } else {
+            onSelectBrigada(null);
+            updateFormData('brigada', 'NombreBrigada', '');
+            updateFormData('brigada', 'CantidadBomberosActivos', '');
+            updateFormData('brigada', 'ContactoCelularComandante', '');
+            updateFormData('brigada', 'EncargadoLogistica', '');
+            updateFormData('brigada', 'ContactoCelularLogistica', '');
+            updateFormData('brigada', 'NumeroEmergenciaPublico', '');
+          }
+        }}
+      >
+        <option value="">-- Nueva Brigada --</option>
+        {brigadas.map(b => (
+          <option key={b.id} value={b.id}>{b.nombre_brigada}</option>
+        ))}
+      </select>
     </div>
-    
+    <div className="step-header">
+      <h2>{selectedBrigada ? 'Asignar Recursos a Brigada Existente' : 'Datos de la Brigada'}</h2>
+      <p>
+        {selectedBrigada
+          ? 'Los datos de la brigada no pueden ser modificados. Solo puedes asignar recursos.'
+          : 'Proporciona los datos básicos de la brigada de bomberos forestales'}
+      </p>
+    </div>
     <div className="form-grid">
       <div className="form-group">
         <label>Nombre de la Brigada *</label>
         <input
           type="text"
-          className="form-input"
+          className={`form-input${selectedBrigada ? ' input-disabled' : ''}`}
           value={formData.brigada.NombreBrigada}
           onChange={(e) => updateFormData('brigada', 'NombreBrigada', e.target.value)}
           placeholder="Ej: Brigada Forestal Central"
           maxLength={80}
           required
+          disabled={!!selectedBrigada}
         />
       </div>
-      
       <div className="form-group">
         <label>Cantidad de Bomberos Activos</label>
         <input
           type="number"
-          className="form-input"
+          className={`form-input${selectedBrigada ? ' input-disabled' : ''}`}
           value={formData.brigada.CantidadBomberosActivos}
           onChange={(e) => updateFormData('brigada', 'CantidadBomberosActivos', e.target.value)}
           placeholder="Ej: 25"
           min="0"
+          disabled={!!selectedBrigada}
         />
       </div>
-      
       <div className="form-group">
         <label>Contacto Celular del Comandante</label>
         <input
           type="tel"
-          className="form-input"
+          className={`form-input${selectedBrigada ? ' input-disabled' : ''}`}
           value={formData.brigada.ContactoCelularComandante}
           onChange={(e) => {
-            const onlyNumbers = e.target.value.replace(/\D/g, ''); // Elimina todo lo que no sea número
+            const onlyNumbers = e.target.value.replace(/\D/g, '');
             if (onlyNumbers.length <= 15) {
               updateFormData('brigada', 'ContactoCelularComandante', onlyNumbers);
             }
@@ -395,27 +425,26 @@ const InformacionGeneralStep = memo(({ formData, selectedBrigada, updateFormData
           maxLength={15}
           inputMode="numeric"
           pattern="\d*"
+          disabled={!!selectedBrigada}
         />
       </div>
-
-      
       <div className="form-group">
         <label>Encargado de Logística</label>
         <input
           type="text"
-          className="form-input"
+          className={`form-input${selectedBrigada ? ' input-disabled' : ''}`}
           value={formData.brigada.EncargadoLogistica}
           onChange={(e) => updateFormData('brigada', 'EncargadoLogistica', e.target.value)}
           placeholder="Nombre del encargado de logística"
           maxLength={60}
+          disabled={!!selectedBrigada}
         />
       </div>
-      
       <div className="form-group">
         <label>Contacto Celular de Logística</label>
         <input
           type="tel"
-          className="form-input"
+          className={`form-input${selectedBrigada ? ' input-disabled' : ''}`}
           value={formData.brigada.ContactoCelularLogistica}
           onChange={(e) => {
             const onlyNumbers = e.target.value.replace(/\D/g, '');
@@ -427,15 +456,14 @@ const InformacionGeneralStep = memo(({ formData, selectedBrigada, updateFormData
           inputMode="numeric"
           pattern="\d*"
           maxLength={15}
+          disabled={!!selectedBrigada}
         />
       </div>
-
-      
       <div className="form-group">
         <label>Número de Emergencia Público</label>
         <input
           type="tel"
-          className="form-input"
+          className={`form-input${selectedBrigada ? ' input-disabled' : ''}`}
           value={formData.brigada.NumeroEmergenciaPublico}
           onChange={(e) => {
             const onlyNumbers = e.target.value.replace(/\D/g, '');
@@ -447,9 +475,9 @@ const InformacionGeneralStep = memo(({ formData, selectedBrigada, updateFormData
           inputMode="numeric"
           pattern="\d*"
           maxLength={6}
+          disabled={!!selectedBrigada}
         />
       </div>
-
     </div>
   </div>
 ));
@@ -1002,7 +1030,10 @@ const FormView = memo(({
   prevStep, 
   nextStep, 
   handleSubmitForm, 
-  loading 
+  loading,
+  brigadas,
+  onSelectBrigada,
+  isEditMode
 }) => (
   <div className="form-container">
     <ProgressBar currentStep={currentStep} steps={steps} />
@@ -1013,6 +1044,8 @@ const FormView = memo(({
           formData={formData}
           selectedBrigada={selectedBrigada}
           updateFormData={updateFormData}
+          brigadas={brigadas}
+          onSelectBrigada={onSelectBrigada}
         />
       )}
       {currentStep === 1 && (
@@ -1174,7 +1207,11 @@ const FormView = memo(({
             disabled={loading || !formData.brigada.NombreBrigada}
           >
             <Save size={20} />
-            {loading ? 'Guardando...' : (selectedBrigada ? 'Actualizar' : 'Guardar Formulario')}
+            {loading
+              ? 'Guardando...'
+              : isEditMode
+                ? 'Actualizar Brigada'
+                : 'Guardar Formulario'}
           </button>
         )}
       </div>
@@ -1204,7 +1241,10 @@ const BomberosApp = () => {
   const [error, setError] = useState(null);
   const [detalleBrigada, setDetalleBrigada] = useState(null);
   const [mostrarModal, setMostrarModal] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
   const [sidebarExpanded, setSidebarExpanded] = useState(false); // Nuevo estado para sidebar
+
+  
 
   // Estados para el formulario
   const [currentStep, setCurrentStep] = useState(0);
@@ -1372,14 +1412,18 @@ const BomberosApp = () => {
       }
     });
     setSelectedBrigada(null);
+    setIsEditMode(false);
     setCurrentView('form');
   }, []);
 
   const handleSubmitForm = useCallback(async () => {
     try {
-      setLoading(true);
-      setError(null);
-      
+    setLoading(true);
+    setError(null);
+    let brigadaId;
+
+    if (selectedBrigada && isEditMode) {
+      // Modo edición: actualiza la brigada
       const brigadaData = {
         NombreBrigada: formData.brigada.NombreBrigada,
         CantidadBomberosActivos: parseInt(formData.brigada.CantidadBomberosActivos) || 0,
@@ -1388,20 +1432,21 @@ const BomberosApp = () => {
         ContactoCelularLogistica: formData.brigada.ContactoCelularLogistica,
         NumeroEmergenciaPublico: formData.brigada.NumeroEmergenciaPublico
       };
-
-      console.log('💾 Guardando brigada:', brigadaData);
-      let brigadaResponse;
-      let brigadaId;
-
-      if (selectedBrigada) {
-        brigadaResponse = await apiService.updateBrigada(selectedBrigada.id, brigadaData);
-        brigadaId = selectedBrigada.id;
-      } else {
-        brigadaResponse = await apiService.createBrigada(brigadaData);
-        brigadaId = brigadaResponse.data?.id;
-      }
-
-      console.log('✅ Brigada guardada:', brigadaResponse);
+      await apiService.updateBrigada(selectedBrigada.id, brigadaData);
+      brigadaId = selectedBrigada.id;
+    } else {
+      // Modo duplicar o nueva: crea una nueva brigada
+      const brigadaData = {
+        NombreBrigada: formData.brigada.NombreBrigada,
+        CantidadBomberosActivos: parseInt(formData.brigada.CantidadBomberosActivos) || 0,
+        ContactoCelularComandante: formData.brigada.ContactoCelularComandante,
+        EncargadoLogistica: formData.brigada.EncargadoLogistica,
+        ContactoCelularLogistica: formData.brigada.ContactoCelularLogistica,
+        NumeroEmergenciaPublico: formData.brigada.NumeroEmergenciaPublico
+      };
+      const brigadaResponse = await apiService.createBrigada(brigadaData);
+      brigadaId = brigadaResponse.data?.id;
+    }
 
       // Guardar equipamiento si existe brigadaId
       if (brigadaId) {
@@ -1483,7 +1528,7 @@ const BomberosApp = () => {
     } finally {
       setLoading(false);
     }
-  }, [formData, selectedBrigada, loadBrigadas]);
+  }, [formData, selectedBrigada, isEditMode, loadBrigadas]);
 
   const handleDeleteBrigada = useCallback(async (id) => {
     if (window.confirm('¿Estás seguro de que deseas eliminar esta brigada?')) {
@@ -1527,6 +1572,7 @@ const BomberosApp = () => {
       }
     });
     setCurrentStep(0);
+    setIsEditMode(true);
     setCurrentView('form');
     console.log('✏️ Editando brigada:', brigada);
   }, []);
@@ -1551,6 +1597,62 @@ const BomberosApp = () => {
         [field]: value
       }
     }));
+  }, []);
+
+  const onSelectBrigada = useCallback((brigada) => {
+    setSelectedBrigada(brigada);
+    if (brigada) {
+      setFormData({
+        brigada: {
+          NombreBrigada: brigada.nombre_brigada || '',
+          CantidadBomberosActivos: brigada.cantidad_bomberos_activos || '',
+          ContactoCelularComandante: brigada.contacto_celular_comandante || '',
+          EncargadoLogistica: brigada.encargado_logistica || '',
+          ContactoCelularLogistica: brigada.contacto_celular_logistica || '',
+          NumeroEmergenciaPublico: brigada.numero_emergencia_publico || ''
+        },
+        equipamiento: {
+          ropa: [],
+          botas: [],
+          guantes: [],
+          epp: [],
+          herramientas: [],
+          logistica_vehiculos: [],
+          alimentacion: [],
+          equipo_campo: [],
+          limpieza_personal: [],
+          limpieza_general: [],
+          medicamentos: [],
+          rescate_animal: []
+        }
+      });
+    } else {
+      // Limpiar los campos si es nueva brigada
+      setFormData({
+        brigada: {
+          NombreBrigada: '',
+          CantidadBomberosActivos: '',
+          ContactoCelularComandante: '',
+          EncargadoLogistica: '',
+          ContactoCelularLogistica: '',
+          NumeroEmergenciaPublico: ''
+        },
+        equipamiento: {
+          ropa: [],
+          botas: [],
+          guantes: [],
+          epp: [],
+          herramientas: [],
+          logistica_vehiculos: [],
+          alimentacion: [],
+          equipo_campo: [],
+          limpieza_personal: [],
+          limpieza_general: [],
+          medicamentos: [],
+          rescate_animal: []
+        }
+      });
+    }
   }, []);
 
   // Render principal - SOLO RENDERIZA COMPONENTES, NO LOS DEFINE
@@ -1599,6 +1701,9 @@ const BomberosApp = () => {
             nextStep={nextStep}
             handleSubmitForm={handleSubmitForm}
             loading={loading}
+            brigadas={brigadas}
+            onSelectBrigada={onSelectBrigada}
+            isEditMode={isEditMode}
           />
         )}
         

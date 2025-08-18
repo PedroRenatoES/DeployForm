@@ -25,7 +25,6 @@ import {
 } from 'lucide-react';
 import '../components/BomberosApp.css';
 import apiService from '../../services/api'; 
-import customInput from './Custom.jsx'; // Asegúrate de que la ruta sea correcta
 
 // ✅ TODOS LOS COMPONENTES FUERA DEL COMPONENTE PRINCIPAL
 

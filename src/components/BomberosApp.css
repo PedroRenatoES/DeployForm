@@ -773,7 +773,7 @@ body {
 
 .form-input[type="number"]:not(.number-input-wrapper .form-input[type="number"]):focus {
   outline: none;
-  border-color: var(--color-primary, #007bff);
+  border-color: var(--color-primary, #D95660);
   box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
 }
 
@@ -837,7 +837,7 @@ body {
 
 /* Estados hover */
 .number-btn:hover:not(:disabled) {
-  background: var(--color-primary, #007bff);
+  background: var(--color-primary, #D95660);
   color: white;
 }
 
@@ -851,7 +851,7 @@ body {
 
 /* Focus en el wrapper */
 .number-input-wrapper:focus-within {
-  border-color: var(--color-primary, #007bff);
+  border-color: var(--color-primary, #D95660);
   box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
 }
 
@@ -959,7 +959,7 @@ body {
 }
 
 .botas-row .number-btn:hover:not(:disabled) {
-  background: var(--color-primary, #007bff);
+  background: var(--color-primary, #D95660);
   color: white;
 }
 
@@ -1061,7 +1061,7 @@ body {
 }
 
 .guantes-row .number-btn:hover:not(:disabled) {
-  background: var(--color-primary, #007bff);
+  background: var(--color-primary, #D95660);
   color: white;
 }
 

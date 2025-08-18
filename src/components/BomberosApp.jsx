@@ -345,171 +345,195 @@ const ProgressBar = memo(({ currentStep, steps }) => {
 
 
 
-// Componente de Step 0 - Información General
-const InformacionGeneralStep = memo(({ formData, selectedBrigada, updateFormData, brigadas, onSelectBrigada }) => (
-  <div className="form-step">
-    <div className="form-group">
-      <label>Elegir Brigada Existente</label>
-      <select
-        className="form-select"
-        value={selectedBrigada ? selectedBrigada.id : ''}
-        onChange={e => {
-          const brigadaId = e.target.value;
-          const brigada = brigadas.find(b => b.id === parseInt(brigadaId));
-          if (brigada) {
-            onSelectBrigada(brigada);
-          } else {
-            onSelectBrigada(null);
-            updateFormData('brigada', 'NombreBrigada', '');
-            updateFormData('brigada', 'CantidadBomberosActivos', '');
-            updateFormData('brigada', 'ContactoCelularComandante', '');
-            updateFormData('brigada', 'EncargadoLogistica', '');
-            updateFormData('brigada', 'ContactoCelularLogistica', '');
-            updateFormData('brigada', 'NumeroEmergenciaPublico', '');
+// Componente de Step 0 - Información General CORREGIDO
+const InformacionGeneralStep = memo(({ formData, selectedBrigada, updateFormData, brigadas, onSelectBrigada, isEditMode }) => {
+  
+  // Determinar si los campos deben estar deshabilitados
+  // Solo se deshabilitan si hay una brigada seleccionada Y NO estamos en modo edición
+  const fieldsDisabled = selectedBrigada && !isEditMode;
+  
+  return (
+    <div className="form-step">
+      {/* Solo mostrar el selector si NO estamos en modo edición */}
+      {!isEditMode && (
+        <div className="form-group">
+          <label>Elegir Brigada Existente</label>
+          <select
+            className="form-select"
+            value={selectedBrigada ? selectedBrigada.id : ''}
+            onChange={e => {
+              const brigadaId = e.target.value;
+              const brigada = brigadas.find(b => b.id === parseInt(brigadaId));
+              if (brigada) {
+                onSelectBrigada(brigada);
+              } else {
+                onSelectBrigada(null);
+                updateFormData('brigada', 'NombreBrigada', '');
+                updateFormData('brigada', 'CantidadBomberosActivos', '');
+                updateFormData('brigada', 'ContactoCelularComandante', '');
+                updateFormData('brigada', 'EncargadoLogistica', '');
+                updateFormData('brigada', 'ContactoCelularLogistica', '');
+                updateFormData('brigada', 'NumeroEmergenciaPublico', '');
+              }
+            }}
+          >
+            <option value="">-- Nueva Brigada --</option>
+            {brigadas.map(b => (
+              <option key={b.id} value={b.id}>{b.nombre_brigada}</option>
+            ))}
+          </select>
+        </div>
+      )}
+      
+      <div className="step-header">
+        <h2>
+          {isEditMode 
+            ? 'Editar Datos de la Brigada' 
+            : selectedBrigada 
+              ? 'Asignar Recursos a Brigada Existente' 
+              : 'Datos de la Brigada'
           }
-        }}
-      >
-        <option value="">-- Nueva Brigada --</option>
-        {brigadas.map(b => (
-          <option key={b.id} value={b.id}>{b.nombre_brigada}</option>
-        ))}
-      </select>
-    </div>
-    <div className="step-header">
-      <h2>{selectedBrigada ? 'Asignar Recursos a Brigada Existente' : 'Datos de la Brigada'}</h2>
-      <p>
-        {selectedBrigada
-          ? 'Los datos de la brigada no pueden ser modificados. Solo puedes asignar recursos.'
-          : 'Proporciona los datos básicos de la brigada de bomberos forestales'}
-      </p>
-    </div>
-    <div className="form-grid">
-      <div className="form-group">
-        <label>Nombre de la Brigada *</label>
-        <input
-          type="text"
-          className={`form-input${selectedBrigada ? ' input-disabled' : ''}`}
-          value={formData.brigada.NombreBrigada}
-          onChange={(e) => updateFormData('brigada', 'NombreBrigada', e.target.value)}
-          placeholder="Ej: Brigada Forestal Central"
-          maxLength={80}
-          required
-          disabled={!!selectedBrigada}
-        />
+        </h2>
+        <p>
+          {isEditMode
+            ? 'Modifica los datos de la brigada existente'
+            : selectedBrigada
+              ? 'Los datos de la brigada no pueden ser modificados. Solo puedes asignar recursos.'
+              : 'Proporciona los datos básicos de la brigada de bomberos forestales'
+          }
+        </p>
       </div>
       
-      <div className="form-group">
-        <label>Cantidad de Bomberos Activos</label>
-        <div className="number-input-wrapper">
+      <div className="form-grid">
+        <div className="form-group">
+          <label>Nombre de la Brigada *</label>
           <input
-            type="number"
-            className={`form-input${selectedBrigada ? ' input-disabled' : ''}`}
-            value={formData.brigada.CantidadBomberosActivos}
-            onChange={(e) => updateFormData('brigada', 'CantidadBomberosActivos', e.target.value)}
-            placeholder="Ej: 25"
-            min="0"
-            disabled={!!selectedBrigada}
+            type="text"
+            className={`form-input${fieldsDisabled ? ' input-disabled' : ''}`}
+            value={formData.brigada.NombreBrigada}
+            onChange={(e) => updateFormData('brigada', 'NombreBrigada', e.target.value)}
+            placeholder="Ej: Brigada Forestal Central"
+            maxLength={80}
+            required
+            disabled={fieldsDisabled}
           />
-          <button 
-            type="button" 
-            className="number-btn number-btn-increment"
-            onClick={() => {
-              const newValue = parseInt(formData.brigada.CantidadBomberosActivos || 0) + 1;
-              updateFormData('brigada', 'CantidadBomberosActivos', newValue.toString());
+        </div>
+        
+        <div className="form-group">
+          <label>Cantidad de Bomberos Activos</label>
+          <div className="number-input-wrapper">
+            <input
+              type="number"
+              className={`form-input${fieldsDisabled ? ' input-disabled' : ''}`}
+              value={formData.brigada.CantidadBomberosActivos}
+              onChange={(e) => updateFormData('brigada', 'CantidadBomberosActivos', e.target.value)}
+              placeholder="Ej: 25"
+              min="0"
+              disabled={fieldsDisabled}
+            />
+            <button 
+              type="button" 
+              className="number-btn number-btn-increment"
+              onClick={() => {
+                const newValue = parseInt(formData.brigada.CantidadBomberosActivos || 0) + 1;
+                updateFormData('brigada', 'CantidadBomberosActivos', newValue.toString());
+              }}
+              disabled={fieldsDisabled}
+            >
+              +
+            </button>
+            <button 
+              type="button" 
+              className="number-btn number-btn-decrement"
+              onClick={() => {
+                const currentValue = parseInt(formData.brigada.CantidadBomberosActivos || 0);
+                const newValue = Math.max(0, currentValue - 1);
+                updateFormData('brigada', 'CantidadBomberosActivos', newValue.toString());
+              }}
+              disabled={fieldsDisabled}
+            >
+              -
+            </button>
+          </div>
+        </div>
+
+        <div className="form-group">
+          <label>Contacto Celular del Comandante</label>
+          <input
+            type="tel"
+            className={`form-input${fieldsDisabled ? ' input-disabled' : ''}`}
+            value={formData.brigada.ContactoCelularComandante}
+            onChange={(e) => {
+              const onlyNumbers = e.target.value.replace(/\D/g, '');
+              if (onlyNumbers.length <= 15) {
+                updateFormData('brigada', 'ContactoCelularComandante', onlyNumbers);
+              }
             }}
-            disabled={!!selectedBrigada}
-          >
-            +
-          </button>
-          <button 
-            type="button" 
-            className="number-btn number-btn-decrement"
-            onClick={() => {
-              const currentValue = parseInt(formData.brigada.CantidadBomberosActivos || 0);
-              const newValue = Math.max(0, currentValue - 1);
-              updateFormData('brigada', 'CantidadBomberosActivos', newValue.toString());
+            placeholder="Ej: 59171234567"
+            maxLength={15}
+            inputMode="numeric"
+            pattern="\d*"
+            disabled={fieldsDisabled}
+          />
+        </div>
+        
+        <div className="form-group">
+          <label>Encargado de Logística</label>
+          <input
+            type="text"
+            className={`form-input${fieldsDisabled ? ' input-disabled' : ''}`}
+            value={formData.brigada.EncargadoLogistica}
+            onChange={(e) => updateFormData('brigada', 'EncargadoLogistica', e.target.value)}
+            placeholder="Nombre del encargado de logística"
+            maxLength={60}
+            disabled={fieldsDisabled}
+          />
+        </div>
+        
+        <div className="form-group">
+          <label>Contacto Celular de Logística</label>
+          <input
+            type="tel"
+            className={`form-input${fieldsDisabled ? ' input-disabled' : ''}`}
+            value={formData.brigada.ContactoCelularLogistica}
+            onChange={(e) => {
+              const onlyNumbers = e.target.value.replace(/\D/g, '');
+              if (onlyNumbers.length <= 15) {
+                updateFormData('brigada', 'ContactoCelularLogistica', onlyNumbers);
+              }
             }}
-            disabled={!!selectedBrigada}
-          >
-            -
-          </button>
+            placeholder="Ej: 59176543210"
+            inputMode="numeric"
+            pattern="\d*"
+            maxLength={15}
+            disabled={fieldsDisabled}
+          />
+        </div>
+        
+        <div className="form-group">
+          <label>Número de Emergencia Público</label>
+          <input
+            type="tel"
+            className={`form-input${fieldsDisabled ? ' input-disabled' : ''}`}
+            value={formData.brigada.NumeroEmergenciaPublico}
+            onChange={(e) => {
+              const onlyNumbers = e.target.value.replace(/\D/g, '');
+              if (onlyNumbers.length <= 6) {
+                updateFormData('brigada', 'NumeroEmergenciaPublico', onlyNumbers);
+              }
+            }}
+            placeholder="Ej: 132"
+            inputMode="numeric"
+            pattern="\d*"
+            maxLength={6}
+            disabled={fieldsDisabled}
+          />
         </div>
       </div>
-
-
-
-      <div className="form-group">
-        <label>Contacto Celular del Comandante</label>
-        <input
-          type="tel"
-          className={`form-input${selectedBrigada ? ' input-disabled' : ''}`}
-          value={formData.brigada.ContactoCelularComandante}
-          onChange={(e) => {
-            const onlyNumbers = e.target.value.replace(/\D/g, '');
-            if (onlyNumbers.length <= 15) {
-              updateFormData('brigada', 'ContactoCelularComandante', onlyNumbers);
-            }
-          }}
-          placeholder="Ej: 59171234567"
-          maxLength={15}
-          inputMode="numeric"
-          pattern="\d*"
-          disabled={!!selectedBrigada}
-        />
-      </div>
-      <div className="form-group">
-        <label>Encargado de Logística</label>
-        <input
-          type="text"
-          className={`form-input${selectedBrigada ? ' input-disabled' : ''}`}
-          value={formData.brigada.EncargadoLogistica}
-          onChange={(e) => updateFormData('brigada', 'EncargadoLogistica', e.target.value)}
-          placeholder="Nombre del encargado de logística"
-          maxLength={60}
-          disabled={!!selectedBrigada}
-        />
-      </div>
-      <div className="form-group">
-        <label>Contacto Celular de Logística</label>
-        <input
-          type="tel"
-          className={`form-input${selectedBrigada ? ' input-disabled' : ''}`}
-          value={formData.brigada.ContactoCelularLogistica}
-          onChange={(e) => {
-            const onlyNumbers = e.target.value.replace(/\D/g, '');
-            if (onlyNumbers.length <= 15) {
-              updateFormData('brigada', 'ContactoCelularLogistica', onlyNumbers);
-            }
-          }}
-          placeholder="Ej: 59176543210"
-          inputMode="numeric"
-          pattern="\d*"
-          maxLength={15}
-          disabled={!!selectedBrigada}
-        />
-      </div>
-      <div className="form-group">
-        <label>Número de Emergencia Público</label>
-        <input
-          type="tel"
-          className={`form-input${selectedBrigada ? ' input-disabled' : ''}`}
-          value={formData.brigada.NumeroEmergenciaPublico}
-          onChange={(e) => {
-            const onlyNumbers = e.target.value.replace(/\D/g, '');
-            if (onlyNumbers.length <= 6) {
-              updateFormData('brigada', 'NumeroEmergenciaPublico', onlyNumbers);
-            }
-          }}
-          placeholder="Ej: 132"
-          inputMode="numeric"
-          pattern="\d*"
-          maxLength={6}
-          disabled={!!selectedBrigada}
-        />
-      </div>
     </div>
-  </div>
-));
+  );
+});
+
 
 // Componente de Step 1 - Equipamiento EPP (ROPA)
 const EquipamientoRopaStep = memo(({ formData, updateFormData, catalogos }) => {
@@ -1273,14 +1297,15 @@ const FormView = memo(({
     
     <div className="form-content">
       {currentStep === 0 && (
-        <InformacionGeneralStep 
-          formData={formData}
-          selectedBrigada={selectedBrigada}
-          updateFormData={updateFormData}
-          brigadas={brigadas}
-          onSelectBrigada={onSelectBrigada}
-        />
-      )}
+  <InformacionGeneralStep 
+    formData={formData}
+    selectedBrigada={selectedBrigada}
+    updateFormData={updateFormData}
+    brigadas={brigadas}
+    onSelectBrigada={onSelectBrigada}
+    isEditMode={isEditMode}  // ← Agregar esta línea
+  />
+)}
       {currentStep === 1 && (
         <EquipamientoRopaStep 
           formData={formData}

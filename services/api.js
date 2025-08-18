@@ -1,6 +1,6 @@
 // src/services/api.js
 // SOLUCIÓN RÁPIDA: Hardcodear la URL
-const API_BASE_URL = 'http://localhost:3000/api';
+const API_BASE_URL = 'https://deployback-9ukf.onrender.com/api';
 
 class ApiService {
   constructor() {

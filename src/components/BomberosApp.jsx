@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 import '../components/BomberosApp.css';
 import apiService from '../../services/api'; 
+import customInput from './Custom.jsx'; // Asegúrate de que la ruta sea correcta
 
 // ✅ TODOS LOS COMPONENTES FUERA DEL COMPONENTE PRINCIPAL
 
@@ -397,18 +398,47 @@ const InformacionGeneralStep = memo(({ formData, selectedBrigada, updateFormData
           disabled={!!selectedBrigada}
         />
       </div>
+      
       <div className="form-group">
         <label>Cantidad de Bomberos Activos</label>
-        <input
-          type="number"
-          className={`form-input${selectedBrigada ? ' input-disabled' : ''}`}
-          value={formData.brigada.CantidadBomberosActivos}
-          onChange={(e) => updateFormData('brigada', 'CantidadBomberosActivos', e.target.value)}
-          placeholder="Ej: 25"
-          min="0"
-          disabled={!!selectedBrigada}
-        />
+        <div className="number-input-wrapper">
+          <input
+            type="number"
+            className={`form-input${selectedBrigada ? ' input-disabled' : ''}`}
+            value={formData.brigada.CantidadBomberosActivos}
+            onChange={(e) => updateFormData('brigada', 'CantidadBomberosActivos', e.target.value)}
+            placeholder="Ej: 25"
+            min="0"
+            disabled={!!selectedBrigada}
+          />
+          <button 
+            type="button" 
+            className="number-btn number-btn-increment"
+            onClick={() => {
+              const newValue = parseInt(formData.brigada.CantidadBomberosActivos || 0) + 1;
+              updateFormData('brigada', 'CantidadBomberosActivos', newValue.toString());
+            }}
+            disabled={!!selectedBrigada}
+          >
+            +
+          </button>
+          <button 
+            type="button" 
+            className="number-btn number-btn-decrement"
+            onClick={() => {
+              const currentValue = parseInt(formData.brigada.CantidadBomberosActivos || 0);
+              const newValue = Math.max(0, currentValue - 1);
+              updateFormData('brigada', 'CantidadBomberosActivos', newValue.toString());
+            }}
+            disabled={!!selectedBrigada}
+          >
+            -
+          </button>
+        </div>
       </div>
+
+
+
       <div className="form-group">
         <label>Contacto Celular del Comandante</label>
         <input
@@ -541,58 +571,142 @@ const EquipamientoRopaStep = memo(({ formData, updateFormData, catalogos }) => {
           </select>
         </div>
         
-        <div className="form-row">
-          <div className="form-group">
-            <label>Cantidad XS</label>
-            <input
-              type="number"
-              className="form-input"
-              value={ropaCantidades.CantidadXS}
-              onChange={(e) => setRopaCantidades({...ropaCantidades, CantidadXS: parseInt(e.target.value) || 0})}
-              min="0"
-            />
-          </div>
-          <div className="form-group">
-            <label>Cantidad S</label>
-            <input
-              type="number"
-              className="form-input"
-              value={ropaCantidades.CantidadS}
-              onChange={(e) => setRopaCantidades({...ropaCantidades, CantidadS: parseInt(e.target.value) || 0})}
-              min="0"
-            />
-          </div>
-          <div className="form-group">
-            <label>Cantidad M</label>
-            <input
-              type="number"
-              className="form-input"
-              value={ropaCantidades.CantidadM}
-              onChange={(e) => setRopaCantidades({...ropaCantidades, CantidadM: parseInt(e.target.value) || 0})}
-              min="0"
-            />
-          </div>
-          <div className="form-group">
-            <label>Cantidad L</label>
-            <input
-              type="number"
-              className="form-input"
-              value={ropaCantidades.CantidadL}
-              onChange={(e) => setRopaCantidades({...ropaCantidades, CantidadL: parseInt(e.target.value) || 0})}
-              min="0"
-            />
-          </div>
-          <div className="form-group">
-            <label>Cantidad XL</label>
-            <input
-              type="number"
-              className="form-input"
-              value={ropaCantidades.CantidadXL}
-              onChange={(e) => setRopaCantidades({...ropaCantidades, CantidadXL: parseInt(e.target.value) || 0})}
-              min="0"
-            />
-          </div>
-        </div>
+        <div className="form-row-custom ">
+  <div className="form-group">
+    <label>Cantidad XS</label>
+    <div className="number-input-wrapper">
+      <input
+        type="number"
+        className="form-input"
+        value={ropaCantidades.CantidadXS}
+        onChange={(e) => setRopaCantidades({...ropaCantidades, CantidadXS: parseInt(e.target.value) || 0})}
+        min="0"
+      />
+      <button 
+        type="button" 
+        className="number-btn number-btn-increment"
+        onClick={() => setRopaCantidades({...ropaCantidades, CantidadXS: ropaCantidades.CantidadXS + 1})}
+      >
+        +
+      </button>
+      <button 
+        type="button" 
+        className="number-btn number-btn-decrement"
+        onClick={() => setRopaCantidades({...ropaCantidades, CantidadXS: Math.max(0, ropaCantidades.CantidadXS - 1)})}
+      >
+        -
+      </button>
+    </div>
+  </div>
+  
+  <div className="form-group">
+    <label>Cantidad S</label>
+    <div className="number-input-wrapper">
+      <input
+        type="number"
+        className="form-input"
+        value={ropaCantidades.CantidadS}
+        onChange={(e) => setRopaCantidades({...ropaCantidades, CantidadS: parseInt(e.target.value) || 0})}
+        min="0"
+      />
+      <button 
+        type="button" 
+        className="number-btn number-btn-increment"
+        onClick={() => setRopaCantidades({...ropaCantidades, CantidadS: ropaCantidades.CantidadS + 1})}
+      >
+        +
+      </button>
+      <button 
+        type="button" 
+        className="number-btn number-btn-decrement"
+        onClick={() => setRopaCantidades({...ropaCantidades, CantidadS: Math.max(0, ropaCantidades.CantidadS - 1)})}
+      >
+        -
+      </button>
+    </div>
+  </div>
+  
+  <div className="form-group">
+    <label>Cantidad M</label>
+    <div className="number-input-wrapper">
+      <input
+        type="number"
+        className="form-input"
+        value={ropaCantidades.CantidadM}
+        onChange={(e) => setRopaCantidades({...ropaCantidades, CantidadM: parseInt(e.target.value) || 0})}
+        min="0"
+      />
+      <button 
+        type="button" 
+        className="number-btn number-btn-increment"
+        onClick={() => setRopaCantidades({...ropaCantidades, CantidadM: ropaCantidades.CantidadM + 1})}
+      >
+        +
+      </button>
+      <button 
+        type="button" 
+        className="number-btn number-btn-decrement"
+        onClick={() => setRopaCantidades({...ropaCantidades, CantidadM: Math.max(0, ropaCantidades.CantidadM - 1)})}
+      >
+        -
+      </button>
+    </div>
+  </div>
+  
+  <div className="form-group">
+    <label>Cantidad L</label>
+    <div className="number-input-wrapper">
+      <input
+        type="number"
+        className="form-input"
+        value={ropaCantidades.CantidadL}
+        onChange={(e) => setRopaCantidades({...ropaCantidades, CantidadL: parseInt(e.target.value) || 0})}
+        min="0"
+      />
+      <button 
+        type="button" 
+        className="number-btn number-btn-increment"
+        onClick={() => setRopaCantidades({...ropaCantidades, CantidadL: ropaCantidades.CantidadL + 1})}
+      >
+        +
+      </button>
+      <button 
+        type="button" 
+        className="number-btn number-btn-decrement"
+        onClick={() => setRopaCantidades({...ropaCantidades, CantidadL: Math.max(0, ropaCantidades.CantidadL - 1)})}
+      >
+        -
+      </button>
+    </div>
+  </div>
+  
+  <div className="form-group">
+    <label>Cantidad XL</label>
+    <div className="number-input-wrapper">
+      <input
+        type="number"
+        className="form-input"
+        value={ropaCantidades.CantidadXL}
+        onChange={(e) => setRopaCantidades({...ropaCantidades, CantidadXL: parseInt(e.target.value) || 0})}
+        min="0"
+      />
+      <button 
+        type="button" 
+        className="number-btn number-btn-increment"
+        onClick={() => setRopaCantidades({...ropaCantidades, CantidadXL: ropaCantidades.CantidadXL + 1})}
+      >
+        +
+      </button>
+      <button 
+        type="button" 
+        className="number-btn number-btn-decrement"
+        onClick={() => setRopaCantidades({...ropaCantidades, CantidadXL: Math.max(0, ropaCantidades.CantidadXL - 1)})}
+      >
+        -
+      </button>
+    </div>
+  </div>
+</div>
         
         <div className="form-group">
           <label>Observaciones</label>
@@ -694,20 +808,44 @@ const BotasGuantesStep = memo(({ formData, updateFormData }) => {
         {/* Sección Botas */}
         <div className="section">
           <h3>Botas</h3>
-          <div className="form-row">
+          <div className="form-row botas-row">
             {['37', '38', '39', '40', '41', '42', '43'].map(talla => (
               <div key={talla} className="form-group">
                 <label>Talla {talla}</label>
-                <input
-                  type="number"
-                  className="form-input"
-                  value={botasCantidades[`Talla${talla}`]}
-                  onChange={(e) => setBotasCantidades({...botasCantidades, [`Talla${talla}`]: parseInt(e.target.value) || 0})}
-                  min="0"
-                />
+                <div className="number-input-wrapper">
+                  <button 
+                    type="button" 
+                    className="number-btn number-btn-decrement"
+                    onClick={() => {
+                      const currentValue = botasCantidades[`Talla${talla}`] || 0;
+                      setBotasCantidades({...botasCantidades, [`Talla${talla}`]: Math.max(0, currentValue - 1)});
+                    }}
+                  >
+                    -
+                  </button>
+                  <input
+                    type="number"
+                    className="form-input"
+                    value={botasCantidades[`Talla${talla}`]}
+                    onChange={(e) => setBotasCantidades({...botasCantidades, [`Talla${talla}`]: parseInt(e.target.value) || 0})}
+                    min="0"
+                  />
+                  <button 
+                    type="button" 
+                    className="number-btn number-btn-increment"
+                    onClick={() => {
+                      const currentValue = botasCantidades[`Talla${talla}`] || 0;
+                      setBotasCantidades({...botasCantidades, [`Talla${talla}`]: currentValue + 1});
+                    }}
+                  >
+                    +
+                  </button>
+                </div>
+
               </div>
             ))}
           </div>
+
           <div className="form-row">
             <div className="form-group">
               <label>Otra Talla</label>
@@ -729,32 +867,58 @@ const BotasGuantesStep = memo(({ formData, updateFormData }) => {
                 maxLength={2}
               />
             </div>
+
+
+
             <div className="form-group">
               <label>Cantidad Otra Talla</label>
-              <input
-                type="number"
-                className="form-input"
-                value={botasCantidades.CantidadOtraTalla}
-                onChange={(e) => {
-                  const valor = parseInt(e.target.value) || 0;
-                  
-                  // Si hay una talla especificada, la cantidad mínima es 1
-                  if (botasCantidades.OtraTalla && botasCantidades.OtraTalla !== '') {
-                    setBotasCantidades({
-                      ...botasCantidades, 
-                      CantidadOtraTalla: valor === 0 ? 1 : valor
-                    });
-                  } else {
-                    // Si no hay talla, permitir 0
-                    setBotasCantidades({
-                      ...botasCantidades, 
-                      CantidadOtraTalla: valor
-                    });
-                  }
-                }}
-                min={botasCantidades.OtraTalla && botasCantidades.OtraTalla !== '' ? "1" : "0"}
-                disabled={!botasCantidades.OtraTalla || botasCantidades.OtraTalla === ''}
-              />
+              <div className="number-input-wrapper">
+                <input
+                  type="number"
+                  className="form-input"
+                  value={botasCantidades.CantidadOtraTalla}
+                  onChange={(e) => {
+                    const valor = parseInt(e.target.value) || 0;
+                    
+                    if (botasCantidades.OtraTalla && botasCantidades.OtraTalla !== '') {
+                      setBotasCantidades({
+                        ...botasCantidades, 
+                        CantidadOtraTalla: valor === 0 ? 1 : valor
+                      });
+                    } else {
+                      setBotasCantidades({
+                        ...botasCantidades, 
+                        CantidadOtraTalla: valor
+                      });
+                    }
+                  }}
+                  min={botasCantidades.OtraTalla && botasCantidades.OtraTalla !== '' ? "1" : "0"}
+                  disabled={!botasCantidades.OtraTalla || botasCantidades.OtraTalla === ''}
+                />
+                <button 
+                  type="button" 
+                  className="number-btn number-btn-decrement"
+                  onClick={() => {
+                    const currentValue = botasCantidades.CantidadOtraTalla || 0;
+                    const minValue = (botasCantidades.OtraTalla && botasCantidades.OtraTalla !== '') ? 1 : 0;
+                    setBotasCantidades({...botasCantidades, CantidadOtraTalla: Math.max(minValue, currentValue - 1)});
+                  }}
+                  disabled={!botasCantidades.OtraTalla || botasCantidades.OtraTalla === ''}
+                >
+                  -
+                </button>
+                <button 
+                  type="button" 
+                  className="number-btn number-btn-increment"
+                  onClick={() => {
+                    const currentValue = botasCantidades.CantidadOtraTalla || 0;
+                    setBotasCantidades({...botasCantidades, CantidadOtraTalla: currentValue + 1});
+                  }}
+                  disabled={!botasCantidades.OtraTalla || botasCantidades.OtraTalla === ''}
+                >
+                  +
+                </button>
+              </div>
             </div>
           </div>
           <div className="form-group">
@@ -794,113 +958,162 @@ const BotasGuantesStep = memo(({ formData, updateFormData }) => {
 
         </div>
 
+
         {/* Sección Guantes */}
         <div className="section">
-  <h3>Guantes</h3>
-  <div className="form-row">
-    {['XS', 'S', 'M', 'L', 'XL', 'XXL'].map(talla => (
-      <div key={talla} className="form-group">
-        <label>Talla {talla}</label>
-        <input
-          type="number"
-          className="form-input"
-          value={guantesCantidades[`Talla${talla}`]}
-          onChange={(e) => setGuantesCantidades({...guantesCantidades, [`Talla${talla}`]: parseInt(e.target.value) || 0})}
-          min="0"
-        />
-      </div>
-    ))}
-  </div>
-  
-  <div className="form-row">
-    <div className="form-group">
-      <label>Otra Talla</label>
-      <input
-        type="text"
-        className="form-input"
-        value={guantesCantidades.OtraTalla}
-        onChange={(e) => {
-          const soloLetras = e.target.value.replace(/[^a-zA-Z]/g, '').slice(0, 5); // solo letras, máx 3
-          setGuantesCantidades({ 
-            ...guantesCantidades, 
-            OtraTalla: soloLetras.toUpperCase(),
-            // Si se borra la talla, resetear la cantidad también
-            CantidadOtraTalla: soloLetras === '' ? 0 : guantesCantidades.CantidadOtraTalla = 1
-          });
-        }}
-        placeholder="Ej: XXL"
-        maxLength={5}
-      />
-    </div>
-
-    <div className="form-group">
-      <label>Cantidad Otra Talla</label>
-      <input
-        type="number"
-        className="form-input"
-        value={guantesCantidades.CantidadOtraTalla}
-        onChange={(e) => {
-          const valor = parseInt(e.target.value) || 0;
+          <h3>Guantes</h3>
           
-          // Si hay una talla especificada, la cantidad mínima es 1
-          if (guantesCantidades.OtraTalla && guantesCantidades.OtraTalla !== '') {
-            setGuantesCantidades({
-              ...guantesCantidades, 
-              CantidadOtraTalla: valor === 0 ? 1 : valor
-            });
-          } else {
-            // Si no hay talla, permitir 0
-            setGuantesCantidades({
-              ...guantesCantidades, 
-              CantidadOtraTalla: valor
-            });
-          }
-        }}
-        min={guantesCantidades.OtraTalla && guantesCantidades.OtraTalla !== '' ? "1" : "0"}
-        disabled={!guantesCantidades.OtraTalla || guantesCantidades.OtraTalla === ''}
-      />
-    </div>
-  </div>
-  
-  <div className="form-group">
-    <label>Observaciones Guantes</label>
-    <textarea
-      className="form-textarea"
-      value={guantesCantidades.Observaciones}
-      onChange={(e) => setGuantesCantidades({...guantesCantidades, Observaciones: e.target.value})}
-      placeholder="Observaciones adicionales"
-      rows="2"
-    />
-  </div>
-  
-  <button 
-    type="button" 
-    className={`add-button ${!tieneGuantesCantidades() ? 'disabled' : ''}`}
-    onClick={agregarGuantes}
-    disabled={!tieneGuantesCantidades()}
-    title={!tieneGuantesCantidades() ? "Debe ingresar al menos una cantidad mayor a 0" : ""}
-  >
-    <Plus size={16} />
-    Agregar Guantes
-  </button>
+          {/* Filas para tallas estándar */}
+          <div className="form-row guantes-row">
+            {['XS', 'S', 'M', 'L', 'XL', 'XXL'].map(talla => (
+              <div key={talla} className="form-group">
+                <label>Talla {talla}</label>
+                <div className="number-input-wrapper">
+                  <button 
+                    type="button" 
+                    className="number-btn number-btn-decrement"
+                    onClick={() => {
+                      const currentValue = guantesCantidades[`Talla${talla}`] || 0;
+                      setGuantesCantidades({...guantesCantidades, [`Talla${talla}`]: Math.max(0, currentValue - 1)});
+                    }}
+                  >
+                    -
+                  </button>
+                  <input
+                    type="number"
+                    className="form-input"
+                    value={guantesCantidades[`Talla${talla}`]}
+                    onChange={(e) => setGuantesCantidades({...guantesCantidades, [`Talla${talla}`]: parseInt(e.target.value) || 0})}
+                    min="0"
+                  />
+                  <button 
+                    type="button" 
+                    className="number-btn number-btn-increment"
+                    onClick={() => {
+                      const currentValue = guantesCantidades[`Talla${talla}`] || 0;
+                      setGuantesCantidades({...guantesCantidades, [`Talla${talla}`]: currentValue + 1});
+                    }}
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+          
+          {/* Campos para otra talla */}
+          <div className="form-row">
+            <div className="form-group">
+              <label>Otra Talla</label>
+              <input
+                type="text"
+                className="form-input"
+                value={guantesCantidades.OtraTalla}
+                onChange={(e) => {
+                  const soloLetras = e.target.value.replace(/[^a-zA-Z]/g, '').slice(0, 5);
+                  setGuantesCantidades({ 
+                    ...guantesCantidades, 
+                    OtraTalla: soloLetras.toUpperCase(),
+                    CantidadOtraTalla: soloLetras === '' ? 0 : guantesCantidades.CantidadOtraTalla = 1
+                  });
+                }}
+                placeholder="Ej: XXL"
+                maxLength={5}
+              />
+            </div>
 
-  {formData.equipamiento.guantes.length > 0 && (
-    <div className="items-list">
-      <h3>Guantes Agregados:</h3>
-      {formData.equipamiento.guantes.map((item, index) => (
-        <div key={index} className="item-card">
-          <p><strong>Cantidades:</strong> XS: {item.TallaXS}, S: {item.TallaS}, M: {item.TallaM}, L: {item.TallaL}, XL: {item.TallaXL}, XXL: {item.TallaXXL}</p>
-          {item.OtraTalla && (
-            <p><strong>Otra talla ({item.OtraTalla}):</strong> {item.CantidadOtraTalla}</p>
-          )}
-          {item.Observaciones && (
-            <p><strong>Observaciones:</strong> {item.Observaciones}</p>
-          )}
-        </div>
-      ))}
-    </div>
-)}
+            <div className="form-group">
+              <label>Cantidad Otra Talla</label>
+              <div className="number-input-wrapper">
+                <input
+                  type="number"
+                  className="form-input"
+                  value={guantesCantidades.CantidadOtraTalla}
+                  onChange={(e) => {
+                    const valor = parseInt(e.target.value) || 0;
+                    if (guantesCantidades.OtraTalla && guantesCantidades.OtraTalla !== '') {
+                      setGuantesCantidades({
+                        ...guantesCantidades, 
+                        CantidadOtraTalla: valor === 0 ? 1 : valor
+                      });
+                    } else {
+                      setGuantesCantidades({
+                        ...guantesCantidades, 
+                        CantidadOtraTalla: valor
+                      });
+                    }
+                  }}
+                  min={guantesCantidades.OtraTalla && guantesCantidades.OtraTalla !== '' ? "1" : "0"}
+                  disabled={!guantesCantidades.OtraTalla || guantesCantidades.OtraTalla === ''}
+                />
+                <button 
+                  type="button" 
+                  className="number-btn number-btn-decrement"
+                  onClick={() => {
+                    const currentValue = guantesCantidades.CantidadOtraTalla || 0;
+                    const minValue = (guantesCantidades.OtraTalla && guantesCantidades.OtraTalla !== '') ? 1 : 0;
+                    setGuantesCantidades({...guantesCantidades, CantidadOtraTalla: Math.max(minValue, currentValue - 1)});
+                  }}
+                  disabled={!guantesCantidades.OtraTalla || guantesCantidades.OtraTalla === ''}
+                >
+                  -
+                </button>
+                <button 
+                  type="button" 
+                  className="number-btn number-btn-increment"
+                  onClick={() => {
+                    const currentValue = guantesCantidades.CantidadOtraTalla || 0;
+                    setGuantesCantidades({...guantesCantidades, CantidadOtraTalla: currentValue + 1});
+                  }}
+                  disabled={!guantesCantidades.OtraTalla || guantesCantidades.OtraTalla === ''}
+                >
+                  +
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          {/* Observaciones */}
+          <div className="form-group">
+            <label>Observaciones Guantes</label>
+            <textarea
+              className="form-textarea"
+              value={guantesCantidades.Observaciones}
+              onChange={(e) => setGuantesCantidades({...guantesCantidades, Observaciones: e.target.value})}
+              placeholder="Observaciones adicionales"
+              rows="2"
+            />
+          </div>
+          
+          {/* Botón para agregar */}
+          <button 
+            type="button" 
+            className={`add-button ${!tieneGuantesCantidades() ? 'disabled' : ''}`}
+            onClick={agregarGuantes}
+            disabled={!tieneGuantesCantidades()}
+            title={!tieneGuantesCantidades() ? "Debe ingresar al menos una cantidad mayor a 0" : ""}
+          >
+            <Plus size={16} />
+            Agregar Guantes
+          </button>
 
+          {/* Lista de guantes agregados */}
+          {formData.equipamiento.guantes.length > 0 && (
+            <div className="items-list">
+              <h3>Guantes Agregados:</h3>
+              {formData.equipamiento.guantes.map((item, index) => (
+                <div key={index} className="item-card">
+                  <p><strong>Cantidades:</strong> XS: {item.TallaXS}, S: {item.TallaS}, M: {item.TallaM}, L: {item.TallaL}, XL: {item.TallaXL}, XXL: {item.TallaXXL}</p>
+                  {item.OtraTalla && (
+                    <p><strong>Otra talla ({item.OtraTalla}):</strong> {item.CantidadOtraTalla}</p>
+                  )}
+                  {item.Observaciones && (
+                    <p><strong>Observaciones:</strong> {item.Observaciones}</p>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     );
@@ -960,16 +1173,37 @@ const EquipamientoGenericoStep = memo(({ title, description, catalogKey, equipam
           </select>
         </div>
         
+
+
+
         <div className="form-group">
-          <label>Cantidad</label>
-          <input
-            type="number"
-            className="form-input"
-            value={cantidad}
-            onChange={(e) => setCantidad(parseInt(e.target.value) || 0)}
-            min="0"
-          />
-        </div>
+  <label>Cantidad</label>
+  <div className="number-input-wrapper">
+    <button 
+      type="button" 
+      className="number-btn number-btn-decrement"
+      onClick={() => setCantidad(Math.max(0, cantidad - 1))}
+    >
+      -
+    </button>
+    <input
+      type="number"
+      className="form-input"
+      value={cantidad}
+      onChange={(e) => setCantidad(parseInt(e.target.value) || 0)}
+      min="0"
+    />
+    <button 
+      type="button" 
+      className="number-btn number-btn-increment"
+      onClick={() => setCantidad(cantidad + 1)}
+    >
+      +
+    </button>
+  </div>
+</div>
+
+
         
         {showMonto && (
           <div className="form-group">

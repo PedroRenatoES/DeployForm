@@ -716,6 +716,12 @@ body {
 
 
 
+
+
+
+
+
+
 .form-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -744,6 +750,334 @@ body {
   transition: var(--transition);
   background: var(--color-white);
 }
+
+/* Ocultar las flechas del input number en Chrome, Safari, Edge */
+.form-input[type="number"]::-webkit-outer-spin-button,
+.form-input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Ocultar las flechas del input number en Firefox */
+.form-input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+/* Estilos para inputs normales (sin wrapper) */
+.form-input[type="number"]:not(.number-input-wrapper .form-input[type="number"]) {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border: 2px solid var(--color-gray);
+}
+
+.form-input[type="number"]:not(.number-input-wrapper .form-input[type="number"]):focus {
+  outline: none;
+  border-color: var(--color-primary, #007bff);
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+}
+
+.form-input[type="number"]:not(.number-input-wrapper .form-input[type="number"]):disabled {
+  background-color: var(--color-gray-light, #f8f9fa);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* ======= CONTADOR PERSONALIZADO ======= */
+/* Contenedor para el input number personalizado */
+.number-input-wrapper {
+  display: flex;
+  align-items: stretch;
+  border: 1px solid var(--color-gray);
+  border-radius: var(--border-radius);
+  background: var(--color-white);
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* El input dentro del wrapper */
+.number-input-wrapper .form-input[type="number"] {
+  flex: 1;
+  border: none !important;
+  padding: var(--spacing-md);
+  text-align: center;
+  outline: none;
+  background: transparent;
+  box-shadow: none !important;
+  order: 1;
+}
+
+/* Estilos base para los botones */
+.number-btn {
+  width: 40px;
+  height: auto;
+  border: none;
+  background: var(--color-white);
+  color: var(--text-primary);
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Botón de decremento (lado izquierdo) */
+.number-btn-decrement {
+  order: 0;
+  border-right: 1px solid var(--color-gray);
+}
+
+/* Botón de incremento (lado derecho) */
+.number-btn-increment {
+  order: 2;
+  border-left: 1px solid var(--color-gray);
+}
+
+/* Estados hover */
+.number-btn:hover:not(:disabled) {
+  background: var(--color-primary, #007bff);
+  color: white;
+}
+
+/* Estado disabled */
+.number-btn:disabled {
+  background-color: var(--color-gray-light, #f8f9fa);
+  color: var(--color-gray);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Focus en el wrapper */
+.number-input-wrapper:focus-within {
+  border-color: var(--color-primary, #007bff);
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+}
+
+
+.form-row-custom {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
+  align-items: flex-start;
+}
+
+.form-row-custom .form-group {
+  flex: 1;
+  min-width: 180px;
+}
+
+
+
+
+/* ===== SOLUCIÓN ESPECÍFICA PARA BOTAS ===== */
+.botas-row {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(120px, 1fr));
+  gap: 10px;
+  width: 100%;
+}
+
+.botas-row .form-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.botas-row .form-group label {
+  font-size: 0.8rem;
+  text-align: center;
+  margin-bottom: 6px;
+}
+
+/* OVERRIDE completo para los wrappers en botas-row */
+.botas-row .number-input-wrapper {
+  display: flex;
+  align-items: stretch;
+  border: 1px solid var(--color-gray);
+  border-radius: var(--border-radius);
+  background: var(--color-white);
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 120px;
+}
+
+/* ELIMINAR todos los orders para botas-row */
+.botas-row .number-btn-decrement,
+.botas-row .number-btn-increment,
+.botas-row .number-input-wrapper .form-input[type="number"] {
+  order: unset !important;
+}
+
+/* Estructura manual sin flexbox order */
+.botas-row .number-btn-decrement {
+  width: 25px;
+  height: auto;
+  border: none;
+  background: var(--color-white);
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-right: 1px solid var(--color-gray);
+  flex-shrink: 0;
+}
+
+.botas-row .number-input-wrapper .form-input[type="number"] {
+  flex: 1;
+  border: none !important;
+  padding: 6px 4px !important;
+  text-align: center;
+  outline: none;
+  background: transparent;
+  box-shadow: none !important;
+  font-size: 0.85rem;
+  min-width: 0;
+}
+
+.botas-row .number-btn-increment {
+  width: 25px;
+  height: auto;
+  border: none;
+  background: var(--color-white);
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-left: 1px solid var(--color-gray);
+  flex-shrink: 0;
+}
+
+.botas-row .number-btn:hover:not(:disabled) {
+  background: var(--color-primary, #007bff);
+  color: white;
+}
+
+.botas-row .number-btn:disabled {
+  background-color: var(--color-gray-light, #f8f9fa);
+  color: var(--color-gray);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+
+
+/*GUANTES*/
+/* ===== SOLUCIÓN ESPECÍFICA PARA GUANTES ===== */
+.guantes-row {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(120px, 1fr));
+  gap: 10px;
+  width: 100%;
+}
+
+.guantes-row .form-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.guantes-row .form-group label {
+  font-size: 0.8rem;
+  text-align: center;
+  margin-bottom: 6px;
+}
+
+/* OVERRIDE completo para los wrappers en guantes-row */
+.guantes-row .number-input-wrapper {
+  display: flex;
+  align-items: stretch;
+  border: 1px solid var(--color-gray);
+  border-radius: var(--border-radius);
+  background: var(--color-white);
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 120px;
+}
+
+/* ELIMINAR todos los orders para guantes-row */
+.guantes-row .number-btn-decrement,
+.guantes-row .number-btn-increment,
+.guantes-row .number-input-wrapper .form-input[type="number"] {
+  order: unset !important;
+}
+
+/* Estructura manual sin flexbox order */
+.guantes-row .number-btn-decrement {
+  width: 25px;
+  height: auto;
+  border: none;
+  background: var(--color-white);
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-right: 1px solid var(--color-gray);
+  flex-shrink: 0;
+}
+
+.guantes-row .number-input-wrapper .form-input[type="number"] {
+  flex: 1;
+  border: none !important;
+  padding: 6px 4px !important;
+  text-align: center;
+  outline: none;
+  background: transparent;
+  box-shadow: none !important;
+  font-size: 0.85rem;
+  min-width: 0;
+}
+
+.guantes-row .number-btn-increment {
+  width: 25px;
+  height: auto;
+  border: none;
+  background: var(--color-white);
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-left: 1px solid var(--color-gray);
+  flex-shrink: 0;
+}
+
+.guantes-row .number-btn:hover:not(:disabled) {
+  background: var(--color-primary, #007bff);
+  color: white;
+}
+
+.guantes-row .number-btn:disabled {
+  background-color: var(--color-gray-light, #f8f9fa);
+  color: var(--color-gray);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+
+
+
+
+
+
 
 
 
@@ -899,7 +1233,7 @@ body {
 
 .modal-content {
   background: var(--color-white);
-  padding: var(--spacing-2xl);
+  padding: 30px;
   border-radius: var(--border-radius-lg);
   max-width: 800px;
   width: 90%;

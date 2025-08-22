@@ -21,12 +21,431 @@ import {
   Heart,
   Trash,
   Eye,
-  FileText
+  FileText,
+  Phone,
+  User,
+  Package,
+  Calendar,
+  MapPin,
+  AlertTriangle
+
 } from 'lucide-react';
 import '../components/BomberosApp.css';
 import apiService from '../../services/api'; 
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
-// ✅ TODOS LOS COMPONENTES FUERA DEL COMPONENTE PRINCIPAL
+
+
+// 1. CREAR NUEVO COMPONENTE - Agregar después de los imports existentes
+const ModalDetallesBrigada = memo(({ detalleBrigada, equipamiento, onClose, mostrar }) => {
+  // Cerrar modal con tecla Esc
+  useEffect(() => {
+    const handleEsc = (e) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    if (mostrar) {
+      document.addEventListener('keydown', handleEsc);
+      // Prevenir scroll del body cuando el modal está abierto
+      document.body.style.overflow = 'hidden';
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEsc);
+      document.body.style.overflow = 'unset';
+    };
+  }, [mostrar, onClose]);
+
+  // No renderizar si no debe mostrarse
+  if (!mostrar || !detalleBrigada) return null;
+
+  // Función para cerrar al hacer clic fuera del modal
+  const handleOverlayClick = (e) => {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
+
+  // Función para contar total de items por categoría
+  const contarItems = (categoria) => {
+    if (!equipamiento[categoria]) return 0;
+    return equipamiento[categoria].reduce((total, item) => {
+      // Para ropa, botas y guantes sumar todas las tallas
+      if (categoria === 'ropa') {
+        return total + (item.cantidad_xs || 0) + (item.cantidad_s || 0) + (item.cantidad_m || 0) + (item.cantidad_l || 0) + (item.cantidad_xl || 0);
+      }
+      if (categoria === 'botas') {
+        return total + (item.talla_37 || 0) + (item.talla_38 || 0) + (item.talla_39 || 0) + (item.talla_40 || 0) + (item.talla_41 || 0) + (item.talla_42 || 0) + (item.talla_43 || 0) + (item.cantidad_otra_talla || 0);
+      }
+      if (categoria === 'guantes') {
+        return total + (item.talla_xs || 0) + (item.talla_s || 0) + (item.talla_m || 0) + (item.talla_l || 0) + (item.talla_xl || 0) + (item.talla_xxl || 0) + (item.cantidad_otra_talla || 0);
+      }
+      return total + (item.cantidad || 0);
+    }, 0);
+  };
+
+  // Configuración de secciones del equipamiento
+  const seccionesEquipamiento = [
+    { key: 'ropa', titulo: '👕 Equipamiento EPP (ROPA)', icon: Shirt, color: '#10b981' },
+    { key: 'botas', titulo: '🥾 Botas', icon: ShieldCheck, color: '#f59e0b' },
+    { key: 'guantes', titulo: '🧤 Guantes', icon: ShieldCheck, color: '#8b5cf6' },
+    { key: 'epp', titulo: '🦺 Equipos EPP', icon: ShieldCheck, color: '#ec4899' },
+    { key: 'herramientas', titulo: '🛠️ Herramientas', icon: Wrench, color: '#f97316' },
+    { key: 'logistica-vehiculos', titulo: '🚚 Logística - Vehículos', icon: Car, color: '#ef4444' },
+    { key: 'alimentacion', titulo: '🍱 Alimentación y Bebidas', icon: Coffee, color: '#06b6d4' },
+    { key: 'equipo-campo', titulo: '🎒 Equipos de Campo', icon: Tent, color: '#6366f1' },
+    { key: 'limpieza-personal', titulo: '🧼 Limpieza Personal', icon: Droplets, color: '#14b8a6' },
+    { key: 'limpieza-general', titulo: '🧽 Limpieza General', icon: Droplets, color: '#3b82f6' },
+    { key: 'medicamentos', titulo: '💊 Medicamentos', icon: Pill, color: '#10b981' },
+    { key: 'rescate-animal', titulo: '🐾 Rescate Animal', icon: Heart, color: '#f43f5e' }
+  ];
+
+  return (
+    <div className="modal-overlay-enhanced" onClick={handleOverlayClick}>
+      <div className="modal-content-enhanced">
+        {/* Header del Modal */}
+        <div className="modal-header-enhanced">
+          <div className="modal-title-section">
+            <div className="modal-icon-container">
+              <Users size={28} />
+            </div>
+            <div>
+              <h2 className="modal-title">Detalles de la Brigada</h2>
+              <p className="modal-subtitle">{detalleBrigada.nombre_brigada}</p>
+            </div>
+          </div>
+          <button 
+            className="modal-close-btn-enhanced" 
+            onClick={onClose}
+            aria-label="Cerrar modal"
+          >
+            <X size={24} />
+          </button>
+        </div>
+
+        {/* Contenido del Modal con Scroll */}
+        <div className="modal-body-enhanced">
+          {/* Información General de la Brigada */}
+          <div className="info-section-enhanced">
+            <h3 className="section-title-enhanced">
+              <FileText size={20} />
+              Información General
+            </h3>
+            <div className="info-grid-enhanced">
+              <div className="info-card-enhanced">
+                <div className="info-icon">
+                  <User size={18} />
+                </div>
+                <div className="info-content">
+                  <span className="info-label">Comandante</span>
+                  <span className="info-value">{detalleBrigada.contacto_celular_comandante || 'No especificado'}</span>
+                </div>
+              </div>
+
+              <div className="info-card-enhanced">
+                <div className="info-icon">
+                  <Package size={18} />
+                </div>
+                <div className="info-content">
+                  <span className="info-label">Encargado Logística</span>
+                  <span className="info-value">{detalleBrigada.encargado_logistica || 'No asignado'}</span>
+                </div>
+              </div>
+
+              <div className="info-card-enhanced">
+                <div className="info-icon">
+                  <Phone size={18} />
+                </div>
+                <div className="info-content">
+                  <span className="info-label">Cel. Logística</span>
+                  <span className="info-value">{detalleBrigada.contacto_celular_logistica || 'No especificado'}</span>
+                </div>
+              </div>
+
+              <div className="info-card-enhanced">
+                <div className="info-icon">
+                  <AlertTriangle size={18} />
+                </div>
+                <div className="info-content">
+                  <span className="info-label">Tel. Emergencia</span>
+                  <span className="info-value">{detalleBrigada.numero_emergencia_publico || 'No definido'}</span>
+                </div>
+              </div>
+
+              <div className="info-card-enhanced">
+                <div className="info-icon">
+                  <Calendar size={18} />
+                </div>
+                <div className="info-content">
+                  <span className="info-label">Fecha Registro</span>
+                  <span className="info-value">
+                    {detalleBrigada.fecha_registro 
+                      ? new Date(detalleBrigada.fecha_registro).toLocaleDateString('es-ES', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric'
+                        })
+                      : 'Sin fecha'
+                    }
+                  </span>
+                </div>
+              </div>
+
+              <div className="info-card-enhanced">
+                <div className="info-icon">
+                  <Users size={18} />
+                </div>
+                <div className="info-content">
+                  <span className="info-label">Bomberos Activos</span>
+                  <span className="info-value">{detalleBrigada.cantidad_bomberos_activos || 0}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Resumen de Equipamiento */}
+          <div className="info-section-enhanced">
+            <h3 className="section-title-enhanced">
+              <Package size={20} />
+              Resumen de Equipamiento
+            </h3>
+            <div className="equipment-summary-grid">
+              {seccionesEquipamiento.map((seccion) => {
+                const cantidad = contarItems(seccion.key);
+                const tieneItems = equipamiento[seccion.key]?.length > 0;
+                
+                return (
+                  <div 
+                    key={seccion.key} 
+                    className={`equipment-summary-card ${tieneItems ? 'has-items' : 'no-items'}`}
+                  >
+                    <div className="equipment-icon" style={{ backgroundColor: seccion.color }}>
+                      <seccion.icon size={20} />
+                    </div>
+                    <div className="equipment-info">
+                      <span className="equipment-name">{seccion.titulo.split(' ').slice(1).join(' ')}</span>
+                      <span className="equipment-count">
+                        {tieneItems ? `${cantidad} items` : 'Sin items'}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Secciones Detalladas de Equipamiento */}
+          <div className="info-section-enhanced">
+            <h3 className="section-title-enhanced">
+              <Wrench size={20} />
+              Equipamiento Detallado
+            </h3>
+            
+            <div className="equipment-detailed-sections">
+              {seccionesEquipamiento.map((seccion) => {
+                const items = equipamiento[seccion.key];
+                if (!items || items.length === 0) return null;
+
+                return (
+                  <div key={seccion.key} className="equipment-detailed-section">
+                    <div className="equipment-section-header">
+                      <div className="equipment-section-icon" style={{ backgroundColor: seccion.color }}>
+                        <seccion.icon size={18} />
+                      </div>
+                      <h4 className="equipment-section-title">{seccion.titulo}</h4>
+                      <span className="equipment-section-count">{items.length} registros</span>
+                    </div>
+
+                    <div className="equipment-items-grid">
+                      {items.map((item, index) => (
+                        <div key={index} className="equipment-item-card">
+                          {/* Renderizado específico según el tipo */}
+                          {seccion.key === 'ropa' && (
+                            <>
+                              <div className="equipment-item-header">
+                                <strong>{item.tipo}</strong>
+                              </div>
+                              <div className="equipment-tallas">
+                                <span>XS: {item.cantidad_xs || 0}</span>
+                                <span>S: {item.cantidad_s || 0}</span>
+                                <span>M: {item.cantidad_m || 0}</span>
+                                <span>L: {item.cantidad_l || 0}</span>
+                                <span>XL: {item.cantidad_xl || 0}</span>
+                              </div>
+                              {item.observaciones && (
+                                <div className="equipment-obs">
+                                  <small>{item.observaciones}</small>
+                                </div>
+                              )}
+                            </>
+                          )}
+
+                          {seccion.key === 'botas' && (
+                            <>
+                              <div className="equipment-item-header">
+                                <strong>Botas</strong>
+                              </div>
+                              <div className="equipment-tallas">
+                                <span>37: {item.talla_37 || 0}</span>
+                                <span>38: {item.talla_38 || 0}</span>
+                                <span>39: {item.talla_39 || 0}</span>
+                                <span>40: {item.talla_40 || 0}</span>
+                                <span>41: {item.talla_41 || 0}</span>
+                                <span>42: {item.talla_42 || 0}</span>
+                                <span>43: {item.talla_43 || 0}</span>
+                              </div>
+                              {item.otra_talla && (
+                                <div className="equipment-extra">
+                                  <span>Talla {item.otra_talla}: {item.cantidad_otra_talla}</span>
+                                </div>
+                              )}
+                            </>
+                          )}
+
+                          {seccion.key === 'guantes' && (
+                            <>
+                              <div className="equipment-item-header">
+                                <strong>Guantes</strong>
+                              </div>
+                              <div className="equipment-tallas">
+                                <span>XS: {item.talla_xs || 0}</span>
+                                <span>S: {item.talla_s || 0}</span>
+                                <span>M: {item.talla_m || 0}</span>
+                                <span>L: {item.talla_l || 0}</span>
+                                <span>XL: {item.talla_xl || 0}</span>
+                                <span>XXL: {item.talla_xxl || 0}</span>
+                              </div>
+                              {item.otra_talla && (
+                                <div className="equipment-extra">
+                                  <span>Talla {item.otra_talla}: {item.cantidad_otra_talla}</span>
+                                </div>
+                              )}
+                            </>
+                          )}
+
+                          {seccion.key === 'logistica-vehiculos' && (
+                            <>
+                              <div className="equipment-item-header">
+                                <strong>{item.tipo || item.nombre}</strong>
+                              </div>
+                              <div className="equipment-quantity">
+                                <span>Cantidad: {item.cantidad}</span>
+                              </div>
+                              {item.monto_aproximado && (
+                                <div className="equipment-price">
+                                  <span>Monto: Bs. {item.monto_aproximado}</span>
+                                </div>
+                              )}
+                            </>
+                          )}
+
+                          {/* Para el resto de categorías */}
+                          {!['ropa', 'botas', 'guantes', 'logistica-vehiculos'].includes(seccion.key) && (
+                            <>
+                              <div className="equipment-item-header">
+                                <strong>{item.nombre || item.tipo}</strong>
+                              </div>
+                              <div className="equipment-quantity">
+                                <span>Cantidad: {item.cantidad}</span>
+                              </div>
+                              {item.observaciones && (
+                                <div className="equipment-obs">
+                                  <small>{item.observaciones}</small>
+                                </div>
+                              )}
+                            </>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        {/* Footer del Modal */}
+        <div className="modal-footer-enhanced">
+          <div className="modal-footer-info">
+            <span className="modal-footer-text">
+              Presiona <kbd>Esc</kbd> para cerrar o haz clic fuera del modal
+            </span>
+          </div>
+          <button 
+            className="btn-modal-close" 
+            onClick={onClose}
+          >
+            <X size={16} />
+            Cerrar
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+});
+
+
+
+// Crear el componente Toast
+const Toast = {
+  success: (message) => {
+    toast.success(message, {
+      position: "top-right",
+      autoClose: 3000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      theme: "colored",
+    });
+  },
+  error: (message) => {
+    toast.error(message, {
+      position: "top-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      theme: "colored",
+    });
+  },
+  warning: (message) => {
+    toast.warning(message, {
+      position: "top-right",
+      autoClose: 4000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      theme: "colored",
+    });
+  },
+  info: (message) => {
+    toast.info(message, {
+      position: "top-right",
+      autoClose: 3000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      theme: "colored",
+    });
+  },
+  promise: (promise, { pending, success, error }) => {
+    return toast.promise(promise, {
+      pending: pending || "Procesando...",
+      success: success || "¡Completado con éxito!",
+      error: error || "Ocurrió un error",
+    });
+  }
+};
+
+
 
 // Componente de navegación - Modificado para sidebar colapsable
 const Sidebar = memo(({ currentView, setCurrentView, isExpanded, setIsExpanded }) => (
@@ -69,15 +488,14 @@ const HomeView = memo(({ brigadas, handleCreateForm }) => (
       <div className="home-hero">
         <div className="hero-content">
           <h1 className="hero-title">
-            Sistema de Formularios
-            <span className="hero-subtitle">Bomberos Forestales 2025</span>
+            Sistema de Gestión de Suministros para Brigadas de Bomberos
           </h1>
           <p className="hero-description">
             Gestiona de manera eficiente el equipamiento y recursos de las brigadas de bomberos forestales
           </p>
           <button className="cta-button" onClick={handleCreateForm}>
             <Plus size={24} />
-            Crear Nuevo Formulario
+            Haz Click Aqui para Nuevo Formulario
           </button>
         </div>
       </div>
@@ -164,6 +582,7 @@ const BoardView = memo(({
               <button 
                 className="action-btn view" 
                 title="Ver detalles"
+                aria-label="Ver detalles de la brigada"
                 onClick={() => {
                   if (!brigada?.id) {
                     console.warn("❗ brigada.id no está definido");
@@ -194,21 +613,28 @@ const BoardView = memo(({
                 }}
               >
                 <Eye size={16} />
+                <span className="tooltip">Ver detalles</span>
               </button>
 
               <button 
                 className="action-btn edit" 
-                title="Editar"
+                title="Editar brigada"
+                aria-label="Editar información de la brigada"
                 onClick={() => handleEditBrigada(brigada)}
               >
                 <Edit3 size={16} />
+                <span className="tooltip">Editar</span>
               </button>
               <button 
                 className="action-btn delete" 
-                title="Eliminar"
+                title="Eliminar brigada"
+                    aria-label="Eliminar brigada"
+
                 onClick={() => handleDeleteBrigada(brigada.id)}
               >
                 <Trash size={16} />
+                    <span className="tooltip">Eliminar</span>
+
               </button>
             </div>
           </div>
@@ -377,7 +803,7 @@ const InformacionGeneralStep = memo(({ formData, selectedBrigada, updateFormData
               }
             }}
           >
-            <option value="">-- Nueva Brigada --</option>
+            <option value="">-- Haz Click Aqui para Seleccionar Brigada Existente --</option>
             {brigadas.map(b => (
               <option key={b.id} value={b.id}>{b.nombre_brigada}</option>
             ))}
@@ -1152,25 +1578,38 @@ const EquipamientoGenericoStep = memo(({ title, description, catalogKey, equipam
   const catalogo = catalogos[catalogKey] || [];
   const equipamientoItems = formData.equipamiento[equipamientoKey] || [];
 
-  const agregarItem = useCallback(() => {
-    if (!selectedItem) return;
-    
-    const nuevoItem = {
-      [idField]: parseInt(selectedItem),
-      Cantidad: cantidad,
-      ...(showMonto && { MontoAproximado: monto }),
-      Observaciones: observaciones
-    };
-    
-    const nuevosItems = [...equipamientoItems, nuevoItem];
-    updateFormData('equipamiento', equipamientoKey, nuevosItems);
-    
-    // Reset form
-    setSelectedItem('');
-    setCantidad(0);
-    setMonto(0);
-    setObservaciones('');
-  }, [selectedItem, cantidad, monto, observaciones, equipamientoItems, updateFormData, equipamientoKey, idField, showMonto]);
+const agregarItem = useCallback(() => {
+  if (!selectedItem) {
+    Toast.warning('Debe seleccionar un item');
+    return;
+  }
+  
+  if (cantidad <= 0) {
+    Toast.warning('La cantidad debe ser mayor a 0');
+    return;
+  }
+  
+  const nuevoItem = {
+    [idField]: parseInt(selectedItem),
+    Cantidad: cantidad,
+    ...(showMonto && { MontoAproximado: monto }),
+    Observaciones: observaciones
+  };
+  
+  const nuevosItems = [...equipamientoItems, nuevoItem];
+  updateFormData('equipamiento', equipamientoKey, nuevosItems);
+  
+  // Toast de éxito con información específica
+  const itemNombre = catalogo.find(c => c.id === parseInt(selectedItem))?.nombre || 'Item';
+  Toast.success(`${itemNombre} agregado correctamente (Cantidad: ${cantidad}${showMonto ? `, Monto: $${monto}` : ''})`);
+  
+  // Reset form
+  setSelectedItem('');
+  setCantidad(0);
+  setMonto(0);
+  setObservaciones('');
+}, [selectedItem, cantidad, monto, observaciones, equipamientoItems, updateFormData, equipamientoKey, idField, showMonto, catalogo]);
+
 
   return (
     <div className="form-step">
@@ -1563,40 +2002,72 @@ const BomberosApp = () => {
   const [equipamiento, setEquipamiento] = useState({});
   
   const obtenerEquipamientoCompleto = useCallback(async (brigadaId) => {
-    const categorias = [
-      'ropa',
-      'botas',
-      'guantes',
-      'epp',
-      'herramientas',
-      'logistica-vehiculos',
-      'alimentacion',
-      'equipo-campo',
-      'limpieza-personal',
-      'limpieza-general',
-      'medicamentos',
-      'rescate-animal'
-    ];
+  const toastId = toast.loading("Cargando detalles del equipamiento...", {
+    position: "top-right"
+  });
 
-    const resultados = {};
+  const categorias = [
+    'ropa',
+    'botas',
+    'guantes',
+    'epp',
+    'herramientas',
+    'logistica-vehiculos',
+    'alimentacion',
+    'equipo-campo',
+    'limpieza-personal',
+    'limpieza-general',
+    'medicamentos',
+    'rescate-animal'
+  ];
 
-    await Promise.all(
-      categorias.map(async (categoria) => {
-        try {
-          const res = await fetch(`/api/equipamiento/${brigadaId}/${categoria}`);
-          if (!res.ok) throw new Error(`Error en ${categoria}`);
+  const resultados = {};
+  let categoriasExitosas = 0;
+  let categoriasFallidas = 0;
 
-          const data = await res.json();
-          resultados[categoria] = data?.data || [];
-        } catch (error) {
-          console.warn(`❌ Fallo al cargar ${categoria}:`, error);
-          resultados[categoria] = [];
-        }
-      })
-    );
+  await Promise.all(
+    categorias.map(async (categoria) => {
+      try {
+        const res = await fetch(`/api/equipamiento/${brigadaId}/${categoria}`);
+        if (!res.ok) throw new Error(`Error en ${categoria}`);
 
-    setEquipamiento(resultados);
-  }, []);
+        const data = await res.json();
+        resultados[categoria] = data?.data || [];
+        categoriasExitosas++;
+      } catch (error) {
+        console.warn(`❌ Fallo al cargar ${categoria}:`, error);
+        resultados[categoria] = [];
+        categoriasFallidas++;
+      }
+    })
+  );
+
+  setEquipamiento(resultados);
+
+  if (categoriasFallidas === 0) {
+    toast.update(toastId, {
+      render: `Equipamiento cargado exitosamente (${categoriasExitosas} categorías)`,
+      type: "success",
+      isLoading: false,
+      autoClose: 2000
+    });
+  } else if (categoriasExitosas > 0) {
+    toast.update(toastId, {
+      render: `Equipamiento cargado parcialmente (${categoriasExitosas}/${categorias.length} categorías)`,
+      type: "warning",
+      isLoading: false,
+      autoClose: 3000
+    });
+  } else {
+    toast.update(toastId, {
+      render: "Error al cargar el equipamiento",
+      type: "error",
+      isLoading: false,
+      autoClose: 4000
+    });
+  }
+}, []);
+
 
   // Cargar datos iniciales
   useEffect(() => {
@@ -1605,43 +2076,58 @@ const BomberosApp = () => {
   }, []);
 
   const loadBrigadas = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      
-      console.log('🔄 Cargando brigadas...');
-      const response = await apiService.getBrigadas();
-      console.log('📦 Respuesta completa:', response);
-      
-      if (response && response.data) {
-        setBrigadas(response.data);
-        console.log('✅ Brigadas cargadas:', response.data);
-      } else if (Array.isArray(response)) {
-        setBrigadas(response);
-        console.log('✅ Brigadas cargadas (array directo):', response);
-      } else {
-        console.warn('⚠️ Estructura de respuesta inesperada:', response);
-        setBrigadas([]);
+  try {
+    setLoading(true);
+    setError(null);
+    
+    console.log('🔄 Cargando brigadas...');
+    const response = await apiService.getBrigadas();
+    console.log('📦 Respuesta completa:', response);
+    
+    if (response && response.data) {
+      setBrigadas(response.data);
+      console.log('✅ Brigadas cargadas:', response.data);
+      // Toast de éxito solo si hay brigadas
+      if (response.data.length > 0) {
+        Toast.success(`${response.data.length} brigadas cargadas correctamente`);
       }
-    } catch (error) {
-      console.error('❌ Error loading brigadas:', error);
-      setError(`Error al cargar las brigadas: ${error.message}`);
+    } else if (Array.isArray(response)) {
+      setBrigadas(response);
+      console.log('✅ Brigadas cargadas (array directo):', response);
+      if (response.length > 0) {
+        Toast.success(`${response.length} brigadas cargadas correctamente`);
+      }
+    } else {
+      console.warn('⚠️ Estructura de respuesta inesperada:', response);
       setBrigadas([]);
-    } finally {
-      setLoading(false);
+      Toast.warning('No se encontraron brigadas');
     }
-  }, []);
+  } catch (error) {
+    console.error('❌ Error loading brigadas:', error);
+    const errorMessage = `Error al cargar las brigadas: ${error.message}`;
+    setError(errorMessage);
+    setBrigadas([]);
+    Toast.error(errorMessage);
+  } finally {
+    setLoading(false);
+  }
+}, []);
+
 
   const loadCatalogos = useCallback(async () => {
-    try {
-      console.log('🔄 Cargando catálogos...');
-      const catalogos = await apiService.getAllCatalogos();
-      console.log('📦 Catálogos cargados:', catalogos);
-      setCatalogos(catalogos);
-    } catch (error) {
-      console.error('❌ Error loading catalogos:', error);
-    }
-  }, []);
+  try {
+    console.log('🔄 Cargando catálogos...');
+    const catalogos = await apiService.getAllCatalogos();
+    console.log('📦 Catálogos cargados:', catalogos);
+    setCatalogos(catalogos);
+    Toast.success('Catálogos cargados correctamente');
+  } catch (error) {
+    console.error('❌ Error loading catalogos:', error);
+    Toast.error(`Error al cargar catálogos: ${error.message}`);
+  }
+}, []);
+
+
 
   const handleCreateForm = useCallback(() => {
     setCurrentStep(0);
@@ -1675,13 +2161,23 @@ const BomberosApp = () => {
   }, []);
 
   const handleSubmitForm = useCallback(async () => {
-    try {
+  const toastId = toast.loading("Guardando formulario...", {
+    position: "top-right"
+  });
+
+  try {
     setLoading(true);
     setError(null);
     let brigadaId;
 
     if (selectedBrigada && isEditMode) {
       // Modo edición: actualiza la brigada
+      toast.update(toastId, {
+        render: "Actualizando información de la brigada...",
+        type: "info",
+        isLoading: true
+      });
+
       const brigadaData = {
         NombreBrigada: formData.brigada.NombreBrigada,
         CantidadBomberosActivos: parseInt(formData.brigada.CantidadBomberosActivos) || 0,
@@ -1692,8 +2188,21 @@ const BomberosApp = () => {
       };
       await apiService.updateBrigada(selectedBrigada.id, brigadaData);
       brigadaId = selectedBrigada.id;
+      
+      toast.update(toastId, {
+        render: "Brigada actualizada correctamente",
+        type: "success",
+        isLoading: false,
+        autoClose: 2000
+      });
     } else {
       // Modo duplicar o nueva: crea una nueva brigada
+      toast.update(toastId, {
+        render: "Creando nueva brigada...",
+        type: "info",
+        isLoading: true
+      });
+
       const brigadaData = {
         NombreBrigada: formData.brigada.NombreBrigada,
         CantidadBomberosActivos: parseInt(formData.brigada.CantidadBomberosActivos) || 0,
@@ -1704,136 +2213,318 @@ const BomberosApp = () => {
       };
       const brigadaResponse = await apiService.createBrigada(brigadaData);
       brigadaId = brigadaResponse.data?.id;
-    }
-
-      // Guardar equipamiento si existe brigadaId
-      if (brigadaId) {
-        console.log('💾 Guardando equipamiento para brigada:', brigadaId);
-        
-        // Guardar ropa
-        for (const ropa of formData.equipamiento.ropa) {
-          await apiService.createEquipamientoRopa(brigadaId, ropa);
-        }
-
-        // Guardar botas
-        for (const botas of formData.equipamiento.botas) {
-          await apiService.createEquipamientoBotas(brigadaId, botas);
-        }
-
-        // Guardar guantes
-        for (const guantes of formData.equipamiento.guantes) {
-          await apiService.createEquipamientoGuantes(brigadaId, guantes);
-        }
-
-        // Guardar EPP
-        for (const epp of formData.equipamiento.epp) {
-          await apiService.createEquipamientoEPPData(brigadaId, epp);
-        }
-
-        // Guardar herramientas
-        for (const herramienta of formData.equipamiento.herramientas) {
-          await apiService.createHerramientasData(brigadaId, herramienta);
-        }
-
-        // Guardar logística vehículos
-        for (const logistica of formData.equipamiento.logistica_vehiculos) {
-          await apiService.createLogisticaVehiculos(brigadaId, logistica);
-        }
-
-        // Guardar alimentación
-        for (const alimentacion of formData.equipamiento.alimentacion) {
-          await apiService.createAlimentacionData(brigadaId, alimentacion);
-        }
-
-        // Guardar equipo campo
-        for (const equipoCampo of formData.equipamiento.equipo_campo) {
-          await apiService.createEquipoCampoData(brigadaId, equipoCampo);
-        }
-
-        // Guardar limpieza personal
-        for (const limpiezaPersonal of formData.equipamiento.limpieza_personal) {
-          await apiService.createLimpiezaPersonalData(brigadaId, limpiezaPersonal);
-        }
-
-        // Guardar limpieza general
-        for (const limpiezaGeneral of formData.equipamiento.limpieza_general) {
-          await apiService.createLimpiezaGeneralData(brigadaId, limpiezaGeneral);
-        }
-
-        // Guardar medicamentos
-        for (const medicamento of formData.equipamiento.medicamentos) {
-          await apiService.createMedicamentosData(brigadaId, medicamento);
-        }
-
-        // Guardar rescate animal
-        for (const rescateAnimal of formData.equipamiento.rescate_animal) {
-          await apiService.createRescateAnimalData(brigadaId, rescateAnimal);
-        }
-
-        console.log('✅ Todo el equipamiento guardado exitosamente');
-      }
       
-      setShowSuccessAnimation(true);
-      setTimeout(() => {
-        setShowSuccessAnimation(false);
-        setCurrentView('board');
-        loadBrigadas();
-      }, 2000);
-
-    } catch (error) {
-      console.error('❌ Error submitting form:', error);
-      setError(`Error al guardar el formulario: ${error.message}`);
-    } finally {
-      setLoading(false);
+      toast.update(toastId, {
+        render: "Brigada creada exitosamente",
+        type: "success",
+        isLoading: false,
+        autoClose: 2000
+      });
     }
-  }, [formData, selectedBrigada, isEditMode, loadBrigadas]);
+
+    // Guardar equipamiento si existe brigadaId
+    if (brigadaId) {
+      console.log('💾 Guardando equipamiento para brigada:', brigadaId);
+      
+      toast.update(toastId, {
+        render: "Guardando equipamiento...",
+        type: "info",
+        isLoading: true
+      });
+
+      let equipamientoGuardado = 0;
+      const totalItems = Object.values(formData.equipamiento).reduce((acc, arr) => acc + arr.length, 0);
+
+      // Guardar cada tipo de equipamiento con feedback
+      const equipamientoPromises = [];
+
+      // Ropa
+      if (formData.equipamiento.ropa.length > 0) {
+        equipamientoPromises.push(
+          ...formData.equipamiento.ropa.map(async (ropa) => {
+            await apiService.createEquipamientoRopa(brigadaId, ropa);
+            equipamientoGuardado++;
+            toast.update(toastId, {
+              render: `Guardando equipamiento... (${equipamientoGuardado}/${totalItems})`,
+              type: "info",
+              isLoading: true
+            });
+          })
+        );
+      }
+
+      // Botas
+      if (formData.equipamiento.botas.length > 0) {
+        equipamientoPromises.push(
+          ...formData.equipamiento.botas.map(async (botas) => {
+            await apiService.createEquipamientoBotas(brigadaId, botas);
+            equipamientoGuardado++;
+            toast.update(toastId, {
+              render: `Guardando equipamiento... (${equipamientoGuardado}/${totalItems})`,
+              type: "info",
+              isLoading: true
+            });
+          })
+        );
+      }
+
+      // Guantes
+      if (formData.equipamiento.guantes.length > 0) {
+        equipamientoPromises.push(
+          ...formData.equipamiento.guantes.map(async (guantes) => {
+            await apiService.createEquipamientoGuantes(brigadaId, guantes);
+            equipamientoGuardado++;
+            toast.update(toastId, {
+              render: `Guardando equipamiento... (${equipamientoGuardado}/${totalItems})`,
+              type: "info",
+              isLoading: true
+            });
+          })
+        );
+      }
+
+      // EPP
+      if (formData.equipamiento.epp.length > 0) {
+        equipamientoPromises.push(
+          ...formData.equipamiento.epp.map(async (epp) => {
+            await apiService.createEquipamientoEPPData(brigadaId, epp);
+            equipamientoGuardado++;
+            toast.update(toastId, {
+              render: `Guardando equipamiento... (${equipamientoGuardado}/${totalItems})`,
+              type: "info",
+              isLoading: true
+            });
+          })
+        );
+      }
+
+      // Herramientas
+      if (formData.equipamiento.herramientas.length > 0) {
+        equipamientoPromises.push(
+          ...formData.equipamiento.herramientas.map(async (herramienta) => {
+            await apiService.createHerramientasData(brigadaId, herramienta);
+            equipamientoGuardado++;
+            toast.update(toastId, {
+              render: `Guardando equipamiento... (${equipamientoGuardado}/${totalItems})`,
+              type: "info",
+              isLoading: true
+            });
+          })
+        );
+      }
+
+      // Logística vehículos
+      if (formData.equipamiento.logistica_vehiculos.length > 0) {
+        equipamientoPromises.push(
+          ...formData.equipamiento.logistica_vehiculos.map(async (logistica) => {
+            await apiService.createLogisticaVehiculos(brigadaId, logistica);
+            equipamientoGuardado++;
+            toast.update(toastId, {
+              render: `Guardando equipamiento... (${equipamientoGuardado}/${totalItems})`,
+              type: "info",
+              isLoading: true
+            });
+          })
+        );
+      }
+
+      // Alimentación
+      if (formData.equipamiento.alimentacion.length > 0) {
+        equipamientoPromises.push(
+          ...formData.equipamiento.alimentacion.map(async (alimentacion) => {
+            await apiService.createAlimentacionData(brigadaId, alimentacion);
+            equipamientoGuardado++;
+            toast.update(toastId, {
+              render: `Guardando equipamiento... (${equipamientoGuardado}/${totalItems})`,
+              type: "info",
+              isLoading: true
+            });
+          })
+        );
+      }
+
+      // Equipo campo
+      if (formData.equipamiento.equipo_campo.length > 0) {
+        equipamientoPromises.push(
+          ...formData.equipamiento.equipo_campo.map(async (equipoCampo) => {
+            await apiService.createEquipoCampoData(brigadaId, equipoCampo);
+            equipamientoGuardado++;
+            toast.update(toastId, {
+              render: `Guardando equipamiento... (${equipamientoGuardado}/${totalItems})`,
+              type: "info",
+              isLoading: true
+            });
+          })
+        );
+      }
+
+      // Limpieza personal
+      if (formData.equipamiento.limpieza_personal.length > 0) {
+        equipamientoPromises.push(
+          ...formData.equipamiento.limpieza_personal.map(async (limpiezaPersonal) => {
+            await apiService.createLimpiezaPersonalData(brigadaId, limpiezaPersonal);
+            equipamientoGuardado++;
+            toast.update(toastId, {
+              render: `Guardando equipamiento... (${equipamientoGuardado}/${totalItems})`,
+              type: "info",
+              isLoading: true
+            });
+          })
+        );
+      }
+
+      // Limpieza general
+      if (formData.equipamiento.limpieza_general.length > 0) {
+        equipamientoPromises.push(
+          ...formData.equipamiento.limpieza_general.map(async (limpiezaGeneral) => {
+            await apiService.createLimpiezaGeneralData(brigadaId, limpiezaGeneral);
+            equipamientoGuardado++;
+            toast.update(toastId, {
+              render: `Guardando equipamiento... (${equipamientoGuardado}/${totalItems})`,
+              type: "info",
+              isLoading: true
+            });
+          })
+        );
+      }
+
+      // Medicamentos
+      if (formData.equipamiento.medicamentos.length > 0) {
+        equipamientoPromises.push(
+          ...formData.equipamiento.medicamentos.map(async (medicamento) => {
+            await apiService.createMedicamentosData(brigadaId, medicamento);
+            equipamientoGuardado++;
+            toast.update(toastId, {
+              render: `Guardando equipamiento... (${equipamientoGuardado}/${totalItems})`,
+              type: "info",
+              isLoading: true
+            });
+          })
+        );
+      }
+
+      // Rescate animal
+      if (formData.equipamiento.rescate_animal.length > 0) {
+        equipamientoPromises.push(
+          ...formData.equipamiento.rescate_animal.map(async (rescateAnimal) => {
+            await apiService.createRescateAnimalData(brigadaId, rescateAnimal);
+            equipamientoGuardado++;
+            toast.update(toastId, {
+              render: `Guardando equipamiento... (${equipamientoGuardado}/${totalItems})`,
+              type: "info",
+              isLoading: true
+            });
+          })
+        );
+      }
+
+      // Ejecutar todas las promesas
+      await Promise.all(equipamientoPromises);
+
+      console.log('✅ Todo el equipamiento guardado exitosamente');
+      
+      toast.update(toastId, {
+        render: `¡Formulario guardado exitosamente! ${totalItems} items de equipamiento registrados.`,
+        type: "success",
+        isLoading: false,
+        autoClose: 3000
+      });
+    }
+    
+    setShowSuccessAnimation(true);
+    setTimeout(() => {
+      setShowSuccessAnimation(false);
+      setCurrentView('board');
+      loadBrigadas();
+    }, 2000);
+
+  } catch (error) {
+    console.error('❌ Error submitting form:', error);
+    const errorMessage = `Error al guardar el formulario: ${error.message}`;
+    setError(errorMessage);
+    
+    toast.update(toastId, {
+      render: errorMessage,
+      type: "error",
+      isLoading: false,
+      autoClose: 5000
+    });
+  } finally {
+    setLoading(false);
+  }
+}, [formData, selectedBrigada, isEditMode, loadBrigadas]);
+
+
 
   const handleDeleteBrigada = useCallback(async (id) => {
-    if (window.confirm('¿Estás seguro de que deseas eliminar esta brigada?')) {
-      try {
-        console.log('🗑️ Eliminando brigada:', id);
-        const response = await apiService.deleteBrigada(id);
-        console.log('✅ Brigada eliminada:', response);
-        
-        await loadBrigadas();
-      } catch (error) {
-        console.error('❌ Error deleting brigada:', error);
-        setError(`Error al eliminar la brigada: ${error.message}`);
-      }
+  if (window.confirm('¿Estás seguro de que deseas eliminar esta brigada?')) {
+    const toastId = toast.loading("Eliminando brigada...", {
+      position: "top-right"
+    });
+
+    try {
+      console.log('🗑️ Eliminando brigada:', id);
+      const response = await apiService.deleteBrigada(id);
+      console.log('✅ Brigada eliminada:', response);
+      
+      toast.update(toastId, {
+        render: "Brigada eliminada exitosamente",
+        type: "success",
+        isLoading: false,
+        autoClose: 3000
+      });
+      
+      await loadBrigadas();
+    } catch (error) {
+      console.error('❌ Error deleting brigada:', error);
+      const errorMessage = `Error al eliminar la brigada: ${error.message}`;
+      setError(errorMessage);
+      
+      toast.update(toastId, {
+        render: errorMessage,
+        type: "error",
+        isLoading: false,
+        autoClose: 5000
+      });
     }
-  }, [loadBrigadas]);
+  }
+}, [loadBrigadas]);
 
   const handleEditBrigada = useCallback((brigada) => {
-    setSelectedBrigada(brigada);
-    setFormData({
-      brigada: {
-        NombreBrigada: brigada.nombre_brigada || '',
-        CantidadBomberosActivos: brigada.cantidad_bomberos_activos || '',
-        ContactoCelularComandante: brigada.contacto_celular_comandante || '',
-        EncargadoLogistica: brigada.encargado_logistica || '',
-        ContactoCelularLogistica: brigada.contacto_celular_logistica || '',
-        NumeroEmergenciaPublico: brigada.numero_emergencia_publico || ''
-      },
-      equipamiento: {
-        ropa: [],
-        botas: [],
-        guantes: [],
-        epp: [],
-        herramientas: [],
-        logistica_vehiculos: [],
-        alimentacion: [],
-        equipo_campo: [],
-        limpieza_personal: [],
-        limpieza_general: [],
-        medicamentos: [],
-        rescate_animal: []
-      }
-    });
-    setCurrentStep(0);
-    setIsEditMode(true);
-    setCurrentView('form');
-    console.log('✏️ Editando brigada:', brigada);
-  }, []);
+  setSelectedBrigada(brigada);
+  setFormData({
+    brigada: {
+      NombreBrigada: brigada.nombre_brigada || '',
+      CantidadBomberosActivos: brigada.cantidad_bomberos_activos || '',
+      ContactoCelularComandante: brigada.contacto_celular_comandante || '',
+      EncargadoLogistica: brigada.encargado_logistica || '',
+      ContactoCelularLogistica: brigada.contacto_celular_logistica || '',
+      NumeroEmergenciaPublico: brigada.numero_emergencia_publico || ''
+    },
+    equipamiento: {
+      ropa: [],
+      botas: [],
+      guantes: [],
+      epp: [],
+      herramientas: [],
+      logistica_vehiculos: [],
+      alimentacion: [],
+      equipo_campo: [],
+      limpieza_personal: [],
+      limpieza_general: [],
+      medicamentos: [],
+      rescate_animal: []
+    }
+  });
+  setCurrentStep(0);
+  setIsEditMode(true);
+  setCurrentView('form');
+  console.log('✏️ Editando brigada:', brigada);
+  
+  // Toast de información
+  Toast.info(`Editando brigada: ${brigada.nombre_brigada}`);
+}, []);
+
 
   const nextStep = useCallback(() => {
     if (currentStep < steps.length - 1) {
@@ -1978,175 +2669,39 @@ const BomberosApp = () => {
       )}
 
       {mostrarModal && detalleBrigada && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <h2>🧾 Detalles de la Brigada</h2>
+  <ModalDetallesBrigada
+    detalleBrigada={detalleBrigada}
+    equipamiento={equipamiento}
+    mostrar={mostrarModal}
+    onClose={() => setMostrarModal(false)}
+  />
+)}
 
-            <div className="brigada-info">
-              <p><strong>📛 Nombre:</strong> {detalleBrigada.nombre_brigada}</p>
-              <p><strong>🧑‍✈️ Comandante:</strong> {detalleBrigada.contacto_celular_comandante}</p>
-              <p><strong>📦 Encargado de Logística:</strong> {detalleBrigada.encargado_logistica}</p>
-              <p><strong>📞 Cel. Logística:</strong> {detalleBrigada.contacto_celular_logistica}</p>
-              <p><strong>🚨 Tel. Emergencia:</strong> {detalleBrigada.numero_emergencia_publico}</p>
-            </div>
 
-            <hr />
 
-            {/* Secciones de equipamiento */}
-            {equipamiento?.ropa?.length > 0 && (
-              <div className="cuadrilla">
-                <h3>👕 Ropa</h3>
-                {equipamiento.ropa.map((item, i) => (
-                  <div key={i} className="cuadrilla-item">
-                    <p><strong>Tipo:</strong> {item.tipo}</p>
-                    <p>XS: {item.cantidad_xs}, S: {item.cantidad_s}, M: {item.cantidad_m}, L: {item.cantidad_l}, XL: {item.cantidad_xl}</p>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {equipamiento?.botas?.length > 0 && (
-              <div className="cuadrilla">
-                <h3>🥾 Botas</h3>
-                {equipamiento.botas.map((item, i) => (
-                  <div key={i} className="cuadrilla-item">
-                    <p>37: {item.talla_37}, 38: {item.talla_38}, 39: {item.talla_39}, 40: {item.talla_40}, 41: {item.talla_41}, 42: {item.talla_42}, 43: {item.talla_43}</p>
-                    {item.otra_talla && (
-                      <p>Otra talla ({item.otra_talla}): {item.cantidad_otra_talla}</p>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {equipamiento?.guantes?.length > 0 && (
-              <div className="cuadrilla">
-                <h3>🧤 Guantes</h3>
-                {equipamiento.guantes.map((item, i) => (
-                  <div key={i} className="cuadrilla-item">
-                    <p>XS: {item.talla_xs}, S: {item.talla_s}, M: {item.talla_m}, L: {item.talla_l}, XL: {item.talla_xl}, XXL: {item.talla_xxl}</p>
-                    {item.otra_talla && (
-                      <p>Otra talla ({item.otra_talla}): {item.cantidad_otra_talla}</p>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {equipamiento?.epp?.length > 0 && (
-              <div className="cuadrilla">
-                <h3>🦺 Equipos EPP</h3>
-                {equipamiento.epp.map((item, i) => (
-                  <div key={i} className="cuadrilla-item">
-                    <p><strong>Equipo:</strong> {item.tipo}</p>
-                    <p>Cantidad: {item.cantidad}</p>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {equipamiento?.herramientas?.length > 0 && (
-              <div className="cuadrilla">
-                <h3>🛠️ Herramientas</h3>
-                {equipamiento.herramientas.map((item, i) => (
-                  <div key={i} className="cuadrilla-item">
-                    <p><strong>Herramienta:</strong> {item.nombre}</p>
-                    <p>Cantidad: {item.cantidad}</p>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {equipamiento?.['logistica-vehiculos']?.length > 0 && (
-              <div className="cuadrilla">
-                <h3>🚚 Logística - Vehículos</h3>
-                {equipamiento['logistica-vehiculos'].map((item, i) => (
-                  <div key={i} className="cuadrilla-item">
-                    <p><strong>Servicio:</strong> {item.tipo}</p>
-                    <p>Monto aproximado: Bs. {item.monto_aproximado}</p>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {equipamiento?.alimentacion?.length > 0 && (
-              <div className="cuadrilla">
-                <h3>🍱 Alimentación y Bebidas</h3>
-                {equipamiento.alimentacion.map((item, i) => (
-                  <div key={i} className="cuadrilla-item">
-                    <p><strong>Producto:</strong> {item.nombre}</p>
-                    <p>Cantidad: {item.cantidad}</p>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {equipamiento?.['equipo-campo']?.length > 0 && (
-              <div className="cuadrilla">
-                <h3>🎒 Equipos de Campo</h3>
-                {equipamiento['equipo-campo'].map((item, i) => (
-                  <div key={i} className="cuadrilla-item">
-                    <p><strong>Equipo:</strong> {item.nombre}</p>
-                    <p>Cantidad: {item.cantidad}</p>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {equipamiento?.['limpieza-personal']?.length > 0 && (
-              <div className="cuadrilla">
-                <h3>🧼 Limpieza Personal</h3>
-                {equipamiento['limpieza-personal'].map((item, i) => (
-                  <div key={i} className="cuadrilla-item">
-                    <p><strong>Producto:</strong> {item.nombre}</p>
-                    <p>Cantidad: {item.cantidad}</p>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {equipamiento?.['limpieza-general']?.length > 0 && (
-              <div className="cuadrilla">
-                <h3>🧽 Limpieza General</h3>
-                {equipamiento['limpieza-general'].map((item, i) => (
-                  <div key={i} className="cuadrilla-item">
-                    <p><strong>Producto:</strong> {item.nombre}</p>
-                    <p>Cantidad: {item.cantidad}</p>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {equipamiento?.medicamentos?.length > 0 && (
-              <div className="cuadrilla">
-                <h3>💊 Medicamentos</h3>
-                {equipamiento.medicamentos.map((item, i) => (
-                  <div key={i} className="cuadrilla-item">
-                    <p><strong>Medicamento:</strong> {item.nombre}</p>
-                    <p>Cantidad: {item.cantidad}</p>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {equipamiento?.['rescate-animal']?.length > 0 && (
-              <div className="cuadrilla">
-                <h3>🐾 Rescate Animal</h3>
-                {equipamiento['rescate-animal'].map((item, i) => (
-                  <div key={i} className="cuadrilla-item">
-                    <p><strong>Producto:</strong> {item.nombre}</p>
-                    <p>Cantidad: {item.cantidad}</p>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            <button className="modal-close" onClick={() => setMostrarModal(false)}>Cerrar</button>
-          </div>
-        </div>
-      )}
+      <ToastContainer
+      position="top-right"
+      autoClose={3000}
+      hideProgressBar={false}
+      newestOnTop={false}
+      closeOnClick
+      rtl={false}
+      pauseOnFocusLoss
+      draggable
+      pauseOnHover
+      theme="colored"
+      toastStyle={{
+        fontSize: '14px',
+        borderRadius: '8px'
+      }}
+    />
     </div>
   );
+
+
+
+
+  
 };
 
 export default BomberosApp;

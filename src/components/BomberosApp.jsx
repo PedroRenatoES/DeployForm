@@ -495,7 +495,7 @@ const HomeView = memo(({ brigadas, handleCreateForm }) => (
           </p>
           <button className="cta-button" onClick={handleCreateForm}>
             <Plus size={24} />
-            Haz Click Aqui para Nuevo Formulario
+            Haz Click Aqui para Nuevo Registro
           </button>
         </div>
       </div>
@@ -542,7 +542,7 @@ const BoardView = memo(({
       <h1>Formularios de Brigadas</h1>
       <button className="create-button" onClick={handleCreateForm}>
         <Plus size={20} />
-        Nuevo Formulario
+        Nuevo Registro
       </button>
     </div>
     
@@ -589,7 +589,7 @@ const BoardView = memo(({
                     return;
                   }
 
-                  fetch(`/api/brigadas/${brigada.id}`)
+                  fetch(`https://deployback-9ukf.onrender.com/api/brigadas/${brigada.id}`)
                     .then(async res => {
                       const contentType = res.headers.get("content-type");
                       if (!contentType || !contentType.includes("application/json")) {
@@ -2028,7 +2028,7 @@ const BomberosApp = () => {
   await Promise.all(
     categorias.map(async (categoria) => {
       try {
-        const res = await fetch(`/api/equipamiento/${brigadaId}/${categoria}`);
+        const res = await fetch(`https://deployback-9ukf.onrender.com/api/equipamiento/${brigadaId}/${categoria}`);
         if (!res.ok) throw new Error(`Error en ${categoria}`);
 
         const data = await res.json();
